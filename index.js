@@ -6,14 +6,24 @@ import { randomUUID } from "crypto";
 function handleAxiosResponse(response) {
   switch (response.status) {
     case 200:
-    case 429:
-    case 403: {
+    case 429: {
       console.log(response.request.path, response.statusText, response.status);
       return response;
     }
 
+    case 403:
+    case 401: {
+      console.log(
+        response.request.path,
+        response.statusText,
+        response.status,
+        "Invalid .ROBLOSECURITY cookie."
+      );
+      return response;
+    }
+
     default: {
-      console.error(response);
+      console.error(response.data);
       return response;
     }
   }
@@ -57,16 +67,28 @@ export class Product {
 export class RobloxAPI {
   #userInfo;
 
+  rateLimitTimeout = 4000;
+
   constructor(ROBLOSECURITY) {
     axios.defaults.headers.common[
       "Cookie"
     ] = `.ROBLOSECURITY=${ROBLOSECURITY};`;
   }
 
+  async #handleRateLimit(response) {
+    if (response.status == 429) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.rateLimitTimeout)
+      );
+    }
+
+    return response;
+  }
+
   setXCsrfToken() {
-    return axios
-      .post("https://auth.roblox.com/v2/logout")
+    return axios("https://www.roblox.com/home")
       .catch(({ response }) => response)
+      .then((response) => this.#handleRateLimit(response))
       .then(handleAxiosResponse)
       .then(({ headers }) => {
         axios.defaults.headers.common["x-csrf-token"] =
@@ -79,6 +101,7 @@ export class RobloxAPI {
   setUserInfo() {
     return axios("https://users.roblox.com/v1/users/authenticated")
       .catch(({ response }) => response)
+      .then((response) => this.#handleRateLimit(response))
       .then(handleAxiosResponse)
       .then(({ data }) => {
         this.#userInfo = data;
@@ -91,6 +114,7 @@ export class RobloxAPI {
         items: [{ itemType: "Asset", id: productId }],
       })
       .catch(({ response }) => response)
+      .then((response) => this.#handleRateLimit(response))
       .then(handleAxiosResponse)
       .then(
         ({
@@ -107,6 +131,7 @@ export class RobloxAPI {
         itemIds: [assetId],
       })
       .catch(({ response }) => response)
+      .then((response) => this.#handleRateLimit(response))
       .then(handleAxiosResponse)
       .then(({ data: [assetDetails] }) => assetDetails);
   }
