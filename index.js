@@ -28,6 +28,16 @@ export class RolimonsItemDetails {
   }
 }
 
+export class Product {
+  id;
+  price;
+
+  constructor(id, price) {
+    this.id = id;
+    this.price = price;
+  }
+}
+
 export class RobloxAPI {
   #userInfo;
 
@@ -127,28 +137,23 @@ export class Bot {
   spamPurchaseAsset(assetDetails) {
     for (let index = 0; index < this.spamMultiplier; index++) {
       setTimeout(() => {
-        this.#robloxApi.purchaseByAssetDetails(assetDetails);
+        this.#robloxApi.purchaseByAssetDetails(assetDetails).then(console.info);
       }, 100 * index);
     }
   }
 
-  async snipeRolimonsLastProduct() {
-    const { data } = await RolimonsFetch.marketplaceNew();
-    const scraper = new Scraper(data);
-    const rolimonsItemDetails = new RolimonsItemDetails(scraper.itemDetails());
-    const lastProduct = rolimonsItemDetails.itemDetails[0];
-
-    if (lastProduct[1][1] == 0) {
+  async snipeProduct(product) {
+    if (product.price == 0) {
       await this.#robloxApi.setXCsrfToken();
 
       const assetDetailsByProductId =
-        await this.#robloxApi.getAssetDetailsByProductId(lastProduct[0]);
+        await this.#robloxApi.getAssetDetailsByProductId(product.id);
 
       if (
         assetDetailsByProductId.price == 0 &&
         assetDetailsByProductId.unitsAvailableForConsumption > 0
       ) {
-        const assetDetails = await this.#robloxApi.getAssetDetailsById(
+        const assetDetails = await this.#robloxApi.getAssetDetailsByAssetId(
           assetDetailsByProductId.collectibleItemId
         );
 
@@ -159,5 +164,17 @@ export class Bot {
         });
       }
     }
+  }
+
+  async snipeRolimonsLastProduct() {
+    const { data } = await RolimonsFetch.marketplaceNew();
+    const scraper = new Scraper(data);
+    const rolimonsItemDetails = new RolimonsItemDetails(scraper.itemDetails());
+    const product = new Product(
+      rolimonsItemDetails.itemDetails[0],
+      rolimonsItemDetails.itemDetails[0][1][1]
+    );
+
+    return await this.snipeProduct(product);
   }
 }
