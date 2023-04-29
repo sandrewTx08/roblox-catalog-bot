@@ -3,6 +3,30 @@
 import axios from "axios";
 import { randomUUID } from "crypto";
 
+function handleAxiosResponse(response) {
+  switch (response.status) {
+    case 200: {
+      console.log(response.request.path, response.statusText, response.status);
+      return response;
+    }
+
+    case 403: {
+      console.log(response.request.path, response.statusText, response.status);
+      return response;
+    }
+
+    case 429: {
+      console.log(response.request.path, response.statusText, response.status);
+      return response;
+    }
+
+    default: {
+      console.error(response);
+      return response;
+    }
+  }
+}
+
 export class RolimonsFetch {
   static marketplaceNew() {
     return axios("https://www.rolimons.com/marketplace/new");
@@ -51,6 +75,7 @@ export class RobloxAPI {
     return axios
       .post("https://auth.roblox.com/v2/login")
       .catch(({ response }) => response)
+      .then(handleAxiosResponse)
       .then(({ headers }) => {
         axios.defaults.headers.common["x-csrf-token"] =
           headers["x-csrf-token"] ||
@@ -60,11 +85,12 @@ export class RobloxAPI {
   }
 
   setUserInfo() {
-    return axios("https://users.roblox.com/v1/users/authenticated").then(
-      ({ data }) => {
+    return axios("https://users.roblox.com/v1/users/authenticated")
+      .catch(({ response }) => response)
+      .then(handleAxiosResponse)
+      .then(({ data }) => {
         this.#userInfo = data;
-      }
-    );
+      });
   }
 
   getAssetDetailsByProductId(productId) {
@@ -72,6 +98,8 @@ export class RobloxAPI {
       .post("https://catalog.roblox.com/v1/catalog/items/details", {
         items: [{ itemType: "Asset", id: productId }],
       })
+      .catch(({ response }) => response)
+      .then(handleAxiosResponse)
       .then(
         ({
           data: {
@@ -86,6 +114,8 @@ export class RobloxAPI {
       .post("https://apis.roblox.com/marketplace-items/v1/items/details", {
         itemIds: [assetId],
       })
+      .catch(({ response }) => response)
+      .then(handleAxiosResponse)
       .then(({ data: [assetDetails] }) => assetDetails);
   }
 
@@ -109,7 +139,8 @@ export class RobloxAPI {
           idempotencyKey: randomUUID(),
         }
       )
-      .catch(({ response }) => response);
+      .catch(({ response }) => response)
+      .then(handleAxiosResponse);
   }
 }
 
@@ -137,7 +168,7 @@ export class Bot {
   spamPurchaseAsset(assetDetails) {
     for (let index = 0; index < this.spamMultiplier; index++) {
       setTimeout(() => {
-        this.#robloxApi.purchaseByAssetDetails(assetDetails).then(console.info);
+        this.#robloxApi.purchaseByAssetDetails(assetDetails);
       }, 100 * index);
     }
   }
@@ -171,7 +202,7 @@ export class Bot {
     const scraper = new Scraper(data);
     const rolimonsItemDetails = new RolimonsItemDetails(scraper.itemDetails());
     const product = new Product(
-      rolimonsItemDetails.itemDetails[0],
+      rolimonsItemDetails.itemDetails[0][0],
       rolimonsItemDetails.itemDetails[0][1][1]
     );
 
