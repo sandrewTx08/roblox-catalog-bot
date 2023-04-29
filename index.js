@@ -3,20 +3,6 @@
 import axios from "axios";
 import { randomUUID } from "crypto";
 
-function handleAxiosResponse(response) {
-  console.log(response.request.path, response.statusText, response.status);
-
-  switch (response.status) {
-    case 200:
-    case 403:
-    case 429:
-      return response;
-
-    default:
-      throw response;
-  }
-}
-
 export class RolimonsFetch {
   static marketplaceNew() {
     return axios("https://www.rolimons.com/marketplace/new");
@@ -63,6 +49,14 @@ export class RobloxAPI {
     ] = `.ROBLOSECURITY=${ROBLOSECURITY};`;
   }
 
+  async #handleResponse(response) {
+    console.log(response.request.path, response.statusText, response.status);
+
+    await this.#handleRateLimit(response);
+
+    return response;
+  }
+
   async #handleRateLimit(response) {
     if (response.status == 429) {
       await new Promise((resolve) =>
@@ -76,11 +70,8 @@ export class RobloxAPI {
   setXCsrfToken() {
     return axios
       .post("https://auth.roblox.com/v2/login")
-      .then(
-        (response) => this.#handleRateLimit(response),
-        ({ response }) => response
-      )
-      .then(handleAxiosResponse)
+      .catch(({ response }) => response)
+      .then((response) => this.#handleResponse(response))
       .then(({ headers }) => {
         axios.defaults.headers.common["x-csrf-token"] =
           headers["x-csrf-token"] ||
@@ -91,11 +82,8 @@ export class RobloxAPI {
 
   setUserInfo() {
     return axios("https://users.roblox.com/v1/users/authenticated")
-      .then(
-        (response) => this.#handleRateLimit(response),
-        ({ response }) => response
-      )
-      .then(handleAxiosResponse)
+      .catch(({ response }) => response)
+      .then((response) => this.#handleResponse(response))
       .then(({ data }) => {
         this.#userInfo = data;
       });
@@ -106,11 +94,8 @@ export class RobloxAPI {
       .post("https://catalog.roblox.com/v1/catalog/items/details", {
         items: [{ itemType: "Asset", id: productId }],
       })
-      .then(
-        (response) => this.#handleRateLimit(response),
-        ({ response }) => response
-      )
-      .then(handleAxiosResponse)
+      .catch(({ response }) => response)
+      .then((response) => this.#handleResponse(response))
       .then(
         ({
           data: {
@@ -125,11 +110,8 @@ export class RobloxAPI {
       .post("https://apis.roblox.com/marketplace-items/v1/items/details", {
         itemIds: [assetId],
       })
-      .then(
-        (response) => this.#handleRateLimit(response),
-        ({ response }) => response
-      )
-      .then(handleAxiosResponse)
+      .catch(({ response }) => response)
+      .then((response) => this.#handleResponse(response))
       .then(({ data: [assetDetails] }) => assetDetails);
   }
 
@@ -153,7 +135,8 @@ export class RobloxAPI {
           idempotencyKey: randomUUID(),
         }
       )
-      .then(handleAxiosResponse);
+      .catch(({ response }) => response)
+      .then((response) => this.#handleResponse(response));
   }
 }
 
