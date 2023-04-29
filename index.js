@@ -4,28 +4,16 @@ import axios from "axios";
 import { randomUUID } from "crypto";
 
 function handleAxiosResponse(response) {
+  console.log(response.request.path, response.statusText, response.status);
+
   switch (response.status) {
     case 200:
-    case 429: {
-      console.log(response.request.path, response.statusText, response.status);
-      return response;
-    }
-
     case 403:
-    case 401: {
-      console.log(
-        response.request.path,
-        response.statusText,
-        response.status,
-        "Invalid .ROBLOSECURITY cookie."
-      );
+    case 429:
       return response;
-    }
 
-    default: {
-      console.error(response.data);
-      return response;
-    }
+    default:
+      throw response;
   }
 }
 
@@ -86,9 +74,12 @@ export class RobloxAPI {
   }
 
   setXCsrfToken() {
-    return axios("https://www.roblox.com/home")
-      .catch(({ response }) => response)
-      .then((response) => this.#handleRateLimit(response))
+    return axios
+      .post("https://auth.roblox.com/v2/login")
+      .then(
+        (response) => this.#handleRateLimit(response),
+        ({ response }) => response
+      )
       .then(handleAxiosResponse)
       .then(({ headers }) => {
         axios.defaults.headers.common["x-csrf-token"] =
@@ -100,8 +91,10 @@ export class RobloxAPI {
 
   setUserInfo() {
     return axios("https://users.roblox.com/v1/users/authenticated")
-      .catch(({ response }) => response)
-      .then((response) => this.#handleRateLimit(response))
+      .then(
+        (response) => this.#handleRateLimit(response),
+        ({ response }) => response
+      )
       .then(handleAxiosResponse)
       .then(({ data }) => {
         this.#userInfo = data;
@@ -113,8 +106,10 @@ export class RobloxAPI {
       .post("https://catalog.roblox.com/v1/catalog/items/details", {
         items: [{ itemType: "Asset", id: productId }],
       })
-      .catch(({ response }) => response)
-      .then((response) => this.#handleRateLimit(response))
+      .then(
+        (response) => this.#handleRateLimit(response),
+        ({ response }) => response
+      )
       .then(handleAxiosResponse)
       .then(
         ({
@@ -130,8 +125,10 @@ export class RobloxAPI {
       .post("https://apis.roblox.com/marketplace-items/v1/items/details", {
         itemIds: [assetId],
       })
-      .catch(({ response }) => response)
-      .then((response) => this.#handleRateLimit(response))
+      .then(
+        (response) => this.#handleRateLimit(response),
+        ({ response }) => response
+      )
       .then(handleAxiosResponse)
       .then(({ data: [assetDetails] }) => assetDetails);
   }
@@ -156,7 +153,6 @@ export class RobloxAPI {
           idempotencyKey: randomUUID(),
         }
       )
-      .catch(({ response }) => response)
       .then(handleAxiosResponse);
   }
 }
