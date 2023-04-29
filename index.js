@@ -5,17 +5,9 @@ import { randomUUID } from "crypto";
 
 function handleAxiosResponse(response) {
   switch (response.status) {
-    case 200: {
-      console.log(response.request.path, response.statusText, response.status);
-      return response;
-    }
-
+    case 200:
+    case 429:
     case 403: {
-      console.log(response.request.path, response.statusText, response.status);
-      return response;
-    }
-
-    case 429: {
       console.log(response.request.path, response.statusText, response.status);
       return response;
     }
@@ -29,7 +21,9 @@ function handleAxiosResponse(response) {
 
 export class RolimonsFetch {
   static marketplaceNew() {
-    return axios("https://www.rolimons.com/marketplace/new");
+    return axios("https://www.rolimons.com/marketplace/new")
+      .catch(({ response }) => response)
+      .then(handleAxiosResponse);
   }
 }
 
