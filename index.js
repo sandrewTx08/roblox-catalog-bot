@@ -21,9 +21,7 @@ function handleAxiosResponse(response) {
 
 export class RolimonsFetch {
   static marketplaceNew() {
-    return axios("https://www.rolimons.com/marketplace/new")
-      .catch(({ response }) => response)
-      .then(handleAxiosResponse);
+    return axios("https://www.rolimons.com/marketplace/new");
   }
 }
 
@@ -67,7 +65,7 @@ export class RobloxAPI {
 
   setXCsrfToken() {
     return axios
-      .post("https://auth.roblox.com/v2/login")
+      .post("https://auth.roblox.com/v2/logout")
       .catch(({ response }) => response)
       .then(handleAxiosResponse)
       .then(({ headers }) => {
@@ -160,6 +158,8 @@ export class Bot {
   }
 
   spamPurchaseAsset(assetDetails) {
+    this.#robloxApi.purchaseByAssetDetails(assetDetails);
+
     for (let index = 0; index < this.spamMultiplier; index++) {
       setTimeout(() => {
         this.#robloxApi.purchaseByAssetDetails(assetDetails);
@@ -168,26 +168,19 @@ export class Bot {
   }
 
   async snipeProduct(product) {
-    if (product.price == 0) {
-      await this.#robloxApi.setXCsrfToken();
+    const assetDetailsByProductId =
+      await this.#robloxApi.getAssetDetailsByProductId(product.id);
 
-      const assetDetailsByProductId =
-        await this.#robloxApi.getAssetDetailsByProductId(product.id);
+    if (assetDetailsByProductId.unitsAvailableForConsumption > 0) {
+      const assetDetails = await this.#robloxApi.getAssetDetailsByAssetId(
+        assetDetailsByProductId.collectibleItemId
+      );
 
-      if (
-        assetDetailsByProductId.price == 0 &&
-        assetDetailsByProductId.unitsAvailableForConsumption > 0
-      ) {
-        const assetDetails = await this.#robloxApi.getAssetDetailsByAssetId(
-          assetDetailsByProductId.collectibleItemId
-        );
-
-        this.spamPurchaseAsset({
-          collectibleItemId: assetDetailsByProductId.collectibleItemId,
-          creatorTargetId: assetDetails.creatorId,
-          collectibleProductId: assetDetails.collectibleProductId,
-        });
-      }
+      this.spamPurchaseAsset({
+        collectibleItemId: assetDetailsByProductId.collectibleItemId,
+        creatorTargetId: assetDetails.creatorId,
+        collectibleProductId: assetDetails.collectibleProductId,
+      });
     }
   }
 
@@ -200,6 +193,6 @@ export class Bot {
       rolimonsItemDetails.itemDetails[0][1][1]
     );
 
-    return await this.snipeProduct(product);
+    if (product.price == 0) return await this.snipeProduct(product);
   }
 }
