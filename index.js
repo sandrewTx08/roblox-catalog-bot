@@ -41,7 +41,7 @@ export class Product {
 export class RobloxAPI {
   #userInfo;
 
-  rateLimitTimeout = 4000;
+  rateLimitTimeout = 10000;
 
   constructor(ROBLOSECURITY) {
     axios.defaults.headers.common[
@@ -50,7 +50,13 @@ export class RobloxAPI {
   }
 
   async #handleResponse(response) {
-    console.log(response.request.path, response.statusText, response.status);
+    response.data?.errors
+      ? console.log(response.request.path, response.data)
+      : console.log(
+          response.request.path,
+          response.statusText,
+          response.status
+        );
 
     await this.#handleRateLimit(response);
 
@@ -69,7 +75,7 @@ export class RobloxAPI {
 
   setXCsrfToken() {
     return axios
-      .post("https://auth.roblox.com/v2/login")
+      .post("https://accountsettings.roblox.com/v1/email")
       .catch(({ response }) => response)
       .then((response) => this.#handleResponse(response))
       .then(({ headers }) => {
@@ -162,13 +168,21 @@ export class Bot {
   }
 
   spamPurchaseAsset(assetDetails) {
-    this.#robloxApi.purchaseByAssetDetails(assetDetails);
+    const promises = [this.#robloxApi.purchaseByAssetDetails(assetDetails)];
 
     for (let index = 0; index < this.spamMultiplier; index++) {
-      setTimeout(() => {
-        this.#robloxApi.purchaseByAssetDetails(assetDetails);
-      }, 100 * index);
+      promises.push(
+        new Promise((resolve) => {
+          setTimeout(() => {
+            this.#robloxApi
+              .purchaseByAssetDetails(assetDetails)
+              .finally(resolve);
+          }, 100 * index);
+        })
+      );
     }
+
+    return Promise.all(promises);
   }
 
   async snipeProduct(product) {
@@ -180,7 +194,7 @@ export class Bot {
         assetDetailsByProductId.collectibleItemId
       );
 
-      this.spamPurchaseAsset({
+      return this.spamPurchaseAsset({
         collectibleItemId: assetDetailsByProductId.collectibleItemId,
         creatorTargetId: assetDetails.creatorId,
         collectibleProductId: assetDetails.collectibleProductId,
