@@ -176,7 +176,7 @@ export class Bot {
   #robloxApi;
 
   spamMultiplier = 5;
-  ignoreProductsAfter = 60000;
+  ignoreProductsAfter = 30000;
   checkAvailableForConsumption = false;
 
   constructor(robloxApi) {
@@ -206,8 +206,9 @@ export class Bot {
       await this.#robloxApi.getAssetDetailsByProductId(product.id);
 
     if (
-      this.checkAvailableForConsumption &&
-      assetDetailsByProductId.unitsAvailableForConsumption > 0
+      this.checkAvailableForConsumption
+        ? assetDetailsByProductId.unitsAvailableForConsumption > 0
+        : true
     ) {
       const assetDetails = await this.#robloxApi.getAssetDetailsByAssetId(
         assetDetailsByProductId.collectibleItemId
