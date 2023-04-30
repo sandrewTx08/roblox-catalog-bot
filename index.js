@@ -21,6 +21,18 @@ export class RolimonsItemDetails {
     this.#sortByTimestamp();
   }
 
+  static formatTimestamp(timestamp) {
+    timestamp = String(timestamp).split("");
+
+    if (timestamp.length < 13) {
+      timestamp.splice(10, 0, "0");
+      timestamp.splice(11, 0, "0");
+      timestamp.splice(12, 0, "0");
+    }
+
+    return new Date(Number(timestamp.join("")));
+  }
+
   #sortByTimestamp() {
     this.#itemDetails = Object.entries(this.#itemDetails).sort(
       (asc, desc) => desc[1][2] - asc[1][2]
@@ -31,10 +43,12 @@ export class RolimonsItemDetails {
 export class Product {
   id;
   price;
+  timestamp;
 
-  constructor(id, price) {
+  constructor(id, price, timestamp) {
     this.id = id;
     this.price = price;
+    this.timestamp = timestamp;
   }
 }
 
@@ -162,6 +176,7 @@ export class Bot {
   #robloxApi;
 
   spamMultiplier = 5;
+  ignoreProductsAfter = 120000;
 
   constructor(robloxApi) {
     this.#robloxApi = robloxApi;
@@ -206,11 +221,20 @@ export class Bot {
     const { data } = await RolimonsFetch.marketplaceNew();
     const scraper = new Scraper(data);
     const rolimonsItemDetails = new RolimonsItemDetails(scraper.itemDetails());
+
     const product = new Product(
       rolimonsItemDetails.itemDetails[0][0],
-      rolimonsItemDetails.itemDetails[0][1][1]
+      rolimonsItemDetails.itemDetails[0][1][1],
+      RolimonsItemDetails.formatTimestamp(
+        rolimonsItemDetails.itemDetails[0][1][2]
+      )
     );
 
-    if (product.price == 0) return await this.snipeProduct(product);
+    if (
+      product.price == 0 &&
+      product.timestamp.getTime() + this.ignoreProductsAfter >
+        new Date().getTime()
+    )
+      return this.snipeProduct(product);
   }
 }
