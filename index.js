@@ -17,7 +17,7 @@ export class RolimonsItemDetails {
   }
 
   constructor(itemDetails) {
-    this.#itemDetails = itemDetails;
+    this.#itemDetails = Object.entries(itemDetails);
     this.#sortByTimestamp();
   }
 
@@ -34,7 +34,7 @@ export class RolimonsItemDetails {
   }
 
   #sortByTimestamp() {
-    this.#itemDetails = Object.entries(this.#itemDetails).sort(
+    this.#itemDetails = this.#itemDetails.sort(
       (asc, desc) => desc[1][2] - asc[1][2]
     );
   }
@@ -58,9 +58,7 @@ export class RobloxAPI {
   rateLimitTimeout = 10000;
 
   constructor(ROBLOSECURITY) {
-    axios.defaults.headers.common[
-      "Cookie"
-    ] = `.ROBLOSECURITY=${ROBLOSECURITY};`;
+    axios.defaults.headers.common.Cookie = `.ROBLOSECURITY=${ROBLOSECURITY};`;
   }
 
   async #handleResponse(response) {
@@ -176,6 +174,7 @@ export class Bot {
   #robloxApi;
 
   spamMultiplier = 5;
+  spamMultiplierTimeout = 0;
   ignoreProductsAfter = 30000;
   checkAvailableForConsumption = false;
 
@@ -184,21 +183,21 @@ export class Bot {
   }
 
   spamPurchaseAsset(assetDetails) {
-    const promises = [this.#robloxApi.purchaseByAssetDetails(assetDetails)];
+    const purchases = [this.#robloxApi.purchaseByAssetDetails(assetDetails)];
 
-    for (let index = 0; index < this.spamMultiplier; index++) {
-      promises.push(
+    for (let multiplier = 0; multiplier < this.spamMultiplier; multiplier++) {
+      purchases.push(
         new Promise((resolve) => {
           setTimeout(() => {
             this.#robloxApi
               .purchaseByAssetDetails(assetDetails)
               .finally(resolve);
-          }, 100 * index);
+          }, this.spamMultiplierTimeout * multiplier);
         })
       );
     }
 
-    return Promise.all(promises);
+    return Promise.all(purchases);
   }
 
   async snipeProduct(product) {
