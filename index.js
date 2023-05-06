@@ -43,12 +43,10 @@ export class RolimonsItemDetails {
 export class Product {
   id;
   price;
-  timestamp;
 
-  constructor(id, price, timestamp) {
+  constructor(id, price) {
     this.id = id;
     this.price = price;
-    this.timestamp = timestamp;
   }
 }
 
@@ -85,6 +83,21 @@ export class RobloxAPI {
     return response;
   }
 
+  findManyLimitedsAssetDetails(Limit = 10) {
+    return axios("https://catalog.roblox.com/v2/search/items/details", {
+      params: {
+        Category: 1,
+        salesTypeFilter: 2,
+        SortType: 3,
+        IncludeNotForSale: true,
+        Limit,
+      },
+    })
+      .catch(({ response }) => response)
+      .then((response) => this.#handleResponse(response))
+      .then(({ data }) => data);
+  }
+
   setXCsrfToken() {
     return axios
       .post("https://accountsettings.roblox.com/v1/email")
@@ -107,7 +120,7 @@ export class RobloxAPI {
       });
   }
 
-  getAssetDetailsByProductId(productId) {
+  findOneCatalogDetailByProductId(productId) {
     return axios
       .post("https://catalog.roblox.com/v1/catalog/items/details", {
         items: [{ itemType: "Asset", id: productId }],
@@ -123,7 +136,7 @@ export class RobloxAPI {
       );
   }
 
-  getAssetDetailsByAssetId(assetId) {
+  findOneAssetDetailsByCollectibleItemId(assetId) {
     return axios
       .post("https://apis.roblox.com/marketplace-items/v1/items/details", {
         itemIds: [assetId],
@@ -137,15 +150,16 @@ export class RobloxAPI {
     collectibleItemId,
     creatorTargetId,
     collectibleProductId,
+    expectedPrice,
   }) {
     return axios
       .post(
         `https://apis.roblox.com/marketplace-sales/v1/item/${collectibleItemId}/purchase-item`,
         {
-          collectibleProductId,
           collectibleItemId,
+          collectibleProductId,
           expectedCurrency: 1,
-          expectedPrice: 0,
+          expectedPrice: expectedPrice || 0,
           expectedPurchaserId: this.#userInfo.id,
           expectedPurchaserType: "User",
           expectedSellerId: creatorTargetId,
@@ -165,7 +179,7 @@ export class Scraper {
     this.#data = data;
   }
 
-  itemDetails() {
+  rolimonsItemDetails() {
     return JSON.parse(this.#data.match(/var item_details = (.*);/)[1]);
   }
 }
@@ -175,22 +189,23 @@ export class Bot {
 
   spamMultiplier = 5;
   spamMultiplierTimeout = 0;
-  ignoreProductsAfter = 30000;
   checkAvailableForConsumption = false;
 
   constructor(robloxApi) {
     this.#robloxApi = robloxApi;
   }
 
-  spamPurchaseAsset(assetDetails) {
-    const purchases = [this.#robloxApi.purchaseByAssetDetails(assetDetails)];
+  spamPurchaseAsset(purchaseAssetDetails) {
+    const purchases = [
+      this.#robloxApi.purchaseByAssetDetails(purchaseAssetDetails),
+    ];
 
     for (let multiplier = 0; multiplier < this.spamMultiplier; multiplier++) {
       purchases.push(
         new Promise((resolve) => {
           setTimeout(() => {
             this.#robloxApi
-              .purchaseByAssetDetails(assetDetails)
+              .purchaseByAssetDetails(purchaseAssetDetails)
               .finally(resolve);
           }, this.spamMultiplierTimeout * multiplier);
         })
@@ -201,44 +216,78 @@ export class Bot {
   }
 
   async snipeProduct(product) {
-    const assetDetailsByProductId =
-      await this.#robloxApi.getAssetDetailsByProductId(product.id);
+    const catalogDetail = await this.#robloxApi.findOneCatalogDetailByProductId(
+      product.id
+    );
 
     if (
       this.checkAvailableForConsumption
-        ? assetDetailsByProductId.unitsAvailableForConsumption > 0
+        ? catalogDetail.unitsAvailableForConsumption > 0
         : true
     ) {
-      const assetDetails = await this.#robloxApi.getAssetDetailsByAssetId(
-        assetDetailsByProductId.collectibleItemId
-      );
+      const assetDetails =
+        await this.#robloxApi.findOneAssetDetailsByCollectibleItemId(
+          catalogDetail.collectibleItemId
+        );
 
       return this.spamPurchaseAsset({
-        collectibleItemId: assetDetailsByProductId.collectibleItemId,
+        collectibleItemId: catalogDetail.collectibleItemId,
         creatorTargetId: assetDetails.creatorId,
         collectibleProductId: assetDetails.collectibleProductId,
+        expectedPrice: 0,
       });
     }
   }
 
-  async snipeRolimonsLastProduct() {
+  async snipeCatalogDetails(catalogDetails) {
+    if (
+      this.checkAvailableForConsumption
+        ? catalogDetails.unitsAvailableForConsumption > 0
+        : true
+    ) {
+      const assetDetails =
+        await this.#robloxApi.findOneAssetDetailsByCollectibleItemId(
+          catalogDetails.collectibleItemId
+        );
+
+      return this.spamPurchaseAsset({
+        collectibleItemId: catalogDetails.collectibleItemId,
+        creatorTargetId: catalogDetails.creatorTargetId,
+        collectibleProductId: assetDetails.collectibleProductId,
+        expectedPrice: 0,
+      });
+    }
+  }
+
+  async snipeRolimonsLastProduct(ignoreProductsAfter = 30000) {
     const { data } = await RolimonsFetch.marketplaceNew();
     const scraper = new Scraper(data);
-    const rolimonsItemDetails = new RolimonsItemDetails(scraper.itemDetails());
+    const rolimonsItemDetails = new RolimonsItemDetails(
+      scraper.rolimonsItemDetails()
+    );
 
     const product = new Product(
       rolimonsItemDetails.itemDetails[0][0],
-      rolimonsItemDetails.itemDetails[0][1][1],
-      RolimonsItemDetails.formatTimestamp(
-        rolimonsItemDetails.itemDetails[0][1][2]
-      )
+      rolimonsItemDetails.itemDetails[0][1][1]
     );
 
     if (
       product.price == 0 &&
-      product.timestamp.getTime() + this.ignoreProductsAfter >
+      RolimonsItemDetails.formatTimestamp(
+        rolimonsItemDetails.itemDetails[0][1][2]
+      ).getTime() +
+        ignoreProductsAfter >
         new Date().getTime()
     )
       return this.snipeProduct(product);
+  }
+
+  async snipeRobloxApiLastProduct() {
+    const {
+      data: [catalogDetails],
+    } = await this.#robloxApi.findManyLimitedsAssetDetails();
+
+    if (catalogDetails.price == 0)
+      return this.snipeCatalogDetails(catalogDetails);
   }
 }
