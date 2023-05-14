@@ -40,45 +40,15 @@ export class RolimonsItemDetails {
   }
 }
 
-export class Product {
-  id;
-  price;
-
-  constructor(id, price) {
-    this.id = id;
-    this.price = price;
-  }
-}
-
 export class RobloxAPI {
   #userInfo;
-
-  rateLimitTimeout = 10000;
 
   constructor(ROBLOSECURITY) {
     axios.defaults.headers.common.Cookie = `.ROBLOSECURITY=${ROBLOSECURITY};`;
   }
 
-  async #handleResponse(response) {
-    response.data?.errors
-      ? console.log(response.request.path, response.data)
-      : console.log(
-          response.request.path,
-          response.statusText,
-          response.status
-        );
-
-    await this.#handleRateLimit(response);
-
-    return response;
-  }
-
-  async #handleRateLimit(response) {
-    if (response.status == 429) {
-      await new Promise((resolve) =>
-        setTimeout(resolve, this.rateLimitTimeout)
-      );
-    }
+  #handleResponse(response) {
+    console.log(response.request.path, response.statusText, response.status);
 
     return response;
   }
@@ -130,16 +100,16 @@ export class RobloxAPI {
       .then(
         ({
           data: {
-            data: [assetDetails],
+            data: [catalogDetails],
           },
-        }) => assetDetails
+        }) => catalogDetails
       );
   }
 
-  findOneAssetDetailsByCollectibleItemId(assetId) {
+  findOneAssetDetailsByCollectibleItemId(collectibleItemId) {
     return axios
       .post("https://apis.roblox.com/marketplace-items/v1/items/details", {
-        itemIds: [assetId],
+        itemIds: [collectibleItemId],
       })
       .catch(({ response }) => response)
       .then((response) => this.#handleResponse(response))
@@ -187,59 +157,23 @@ export class Scraper {
 export class Bot {
   #robloxApi;
 
-  spamMultiplier = 5;
-  spamMultiplierTimeout = 0;
+  spamMultiplier = 20;
   checkAvailableForConsumption = false;
 
   constructor(robloxApi) {
     this.#robloxApi = robloxApi;
   }
 
-  spamPurchaseAsset(purchaseAssetDetails) {
-    const purchases = [
-      this.#robloxApi.purchaseByAssetDetails(purchaseAssetDetails),
-    ];
+  spamPurchaseCatalogDetails(catalogDetails) {
+    const purchases = [];
 
-    for (let multiplier = 0; multiplier < this.spamMultiplier; multiplier++) {
-      purchases.push(
-        new Promise((resolve) => {
-          setTimeout(() => {
-            this.#robloxApi
-              .purchaseByAssetDetails(purchaseAssetDetails)
-              .finally(resolve);
-          }, this.spamMultiplierTimeout * multiplier);
-        })
-      );
-    }
+    for (let multiplier = 0; multiplier < this.spamMultiplier; multiplier++)
+      purchases.push(this.purchaseCatalogDetails(catalogDetails));
 
     return Promise.all(purchases);
   }
 
-  async snipeProduct(product) {
-    const catalogDetail = await this.#robloxApi.findOneCatalogDetailByProductId(
-      product.id
-    );
-
-    if (
-      this.checkAvailableForConsumption
-        ? catalogDetail.unitsAvailableForConsumption > 0
-        : true
-    ) {
-      const assetDetails =
-        await this.#robloxApi.findOneAssetDetailsByCollectibleItemId(
-          catalogDetail.collectibleItemId
-        );
-
-      return this.spamPurchaseAsset({
-        collectibleItemId: catalogDetail.collectibleItemId,
-        creatorTargetId: assetDetails.creatorId,
-        collectibleProductId: assetDetails.collectibleProductId,
-        expectedPrice: 0,
-      });
-    }
-  }
-
-  async snipeCatalogDetails(catalogDetails) {
+  async purchaseCatalogDetails(catalogDetails) {
     if (
       this.checkAvailableForConsumption
         ? catalogDetails.unitsAvailableForConsumption > 0
@@ -250,7 +184,7 @@ export class Bot {
           catalogDetails.collectibleItemId
         );
 
-      return this.spamPurchaseAsset({
+      return this.#robloxApi.purchaseByAssetDetails({
         collectibleItemId: catalogDetails.collectibleItemId,
         creatorTargetId: catalogDetails.creatorTargetId,
         collectibleProductId: assetDetails.collectibleProductId,
@@ -261,25 +195,25 @@ export class Bot {
 
   async snipeRolimonsLastProduct(ignoreProductsAfter = 30000) {
     const { data } = await RolimonsFetch.marketplaceNew();
-    const scraper = new Scraper(data);
     const rolimonsItemDetails = new RolimonsItemDetails(
-      scraper.rolimonsItemDetails()
-    );
-
-    const product = new Product(
-      rolimonsItemDetails.itemDetails[0][0],
-      rolimonsItemDetails.itemDetails[0][1][1]
+      new Scraper(data).rolimonsItemDetails()
     );
 
     if (
-      product.price == 0 &&
+      rolimonsItemDetails.itemDetails[0][1][1] == 0 &&
       RolimonsItemDetails.formatTimestamp(
         rolimonsItemDetails.itemDetails[0][1][2]
       ).getTime() +
         ignoreProductsAfter >
         new Date().getTime()
-    )
-      return this.snipeProduct(product);
+    ) {
+      const catalogDetails =
+        await this.#robloxApi.findOneCatalogDetailByProductId(
+          rolimonsItemDetails.itemDetails[0][0]
+        );
+
+      return this.spamPurchaseCatalogDetails(catalogDetails);
+    }
   }
 
   async snipeRobloxApiLastProduct() {
@@ -288,6 +222,6 @@ export class Bot {
     } = await this.#robloxApi.findManyLimitedsAssetDetails();
 
     if (catalogDetails.price == 0)
-      return this.snipeCatalogDetails(catalogDetails);
+      return this.spamPurchaseCatalogDetails(catalogDetails);
   }
 }
