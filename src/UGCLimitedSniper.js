@@ -1,8 +1,7 @@
 import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO.js";
 import RobloxService from "./RobloxService.js";
-import RolimonsScraper from "./RolimonsScraper.js";
 import RolimonsItemDetails from "./RolimonsItemDetails.js";
-import RolimonsService from "./RolimousService.js";
+import RolimonsService from "./RolimonsService.js";
 
 export class UGCLimitedSniper {
   #robloxService;
@@ -48,20 +47,19 @@ export class UGCLimitedSniper {
     }
   }
 
-  async snipeRolimonsLastProduct(ignoreProductsAfter = 30000) {
-    const { data } = await RolimonsService.marketplaceNew();
-    const rolimonsItemDetails = new RolimonsItemDetails(
-      new RolimonsScraper(data).rolimonsItemDetails()
-    );
+  async snipeRolimonsCatalogLastProduct(ignoreProductAfter = 30_000) {
+    const rolimonsItemDetails =
+      await new RolimonsService().findManyRolimonsItemsDetails();
 
-    if (
+    const ignoreProduct =
       rolimonsItemDetails.itemDetails[0][1][1] == 0 &&
       RolimonsItemDetails.formatTimestamp(
         rolimonsItemDetails.itemDetails[0][1][2]
       ).getTime() +
-        ignoreProductsAfter >
-        new Date().getTime()
-    ) {
+        ignoreProductAfter >
+        new Date().getTime();
+
+    if (ignoreProduct) {
       const catalogDetails =
         await this.#robloxService.findOneCatalogDetailByProductId(
           rolimonsItemDetails.itemDetails[0][0]
@@ -71,7 +69,7 @@ export class UGCLimitedSniper {
     }
   }
 
-  async snipeRobloxApiLastProduct() {
+  async snipeRobloxCatalogLastProduct() {
     const {
       data: [catalogDetails],
     } = await this.#robloxService.findManyLimitedsAssetDetails();
