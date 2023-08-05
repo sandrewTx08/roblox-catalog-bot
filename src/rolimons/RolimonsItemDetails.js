@@ -1,12 +1,8 @@
 export class RolimonsItemDetails {
-  #itemDetails;
-
-  get itemDetails() {
-    return this.#itemDetails;
-  }
+  itemDetails;
 
   constructor(itemDetails) {
-    this.#itemDetails = Object.entries(itemDetails);
+    this.itemDetails = Object.entries(itemDetails);
     this.#sortByTimestamp();
   }
 
@@ -28,7 +24,7 @@ export class RolimonsItemDetails {
   }
 
   #sortByTimestamp() {
-    this.#itemDetails = this.#itemDetails.sort(
+    this.itemDetails = this.itemDetails.sort(
       (asc, desc) => desc[1][2] - asc[1][2]
     );
   }

@@ -1,20 +1,42 @@
-import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO.js";
-import RobloxService from "./RobloxService.js";
-import RolimonsItemDetails from "./RolimonsItemDetails.js";
-import RolimonsService from "./RolimonsService.js";
+import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO.js";
+import User from "../user/User.js";
+import RobloxRepository from "../roblox/RobloxRepository.js";
+import RobloxService from "../roblox/RobloxService.js";
+import RolimonsItemDetails from "../rolimons/RolimonsItemDetails.js";
+import RolimonsRespository from "../rolimons/RolimonsRepository.js";
+import RolimonsService from "../rolimons/RolimonsService.js";
+import axios from "axios";
 
-export class UGCLimitedSniper {
+export class UGCLimitedSniperController {
   #robloxService;
+  #rolimonsService;
+
+  /** @type {User} */
+  #user;
 
   spamMultiplier = 20;
   checkAvailableForConsumption = false;
 
-  /**
-   *
-   * @param {RobloxService} robloxService
-   */
-  constructor(robloxService) {
-    this.#robloxService = robloxService;
+  constructor(ROBLOSECURITY) {
+    axios.defaults.headers.common.Cookie = `.ROBLOSECURITY=${ROBLOSECURITY};`;
+    this.#rolimonsService = new RolimonsService(new RolimonsRespository());
+    this.#robloxService = new RobloxService(new RobloxRepository());
+  }
+
+  setUser() {
+    return this.#robloxService
+      .getUser()
+      .catch(({ response }) => response)
+      .then((user) => {
+        this.#user = user;
+      });
+  }
+
+  setXCsrfToken() {
+    return this.#robloxService.getXCsrfToken().then((xCsrfToken) => {
+      axios.defaults.headers.common["x-csrf-token"] =
+        xCsrfToken || axios.defaults.headers.common["x-csrf-token"] || "";
+    });
   }
 
   spamPurchaseCatalogDetails(catalogDetails) {
@@ -42,14 +64,15 @@ export class UGCLimitedSniper {
           catalogDetails.collectibleItemId,
           assetDetails.collectibleProductId,
           catalogDetails.creatorTargetId
-        )
+        ),
+        this.#user.id
       );
     }
   }
 
   async snipeRolimonsCatalogLastProduct(ignoreProductAfter = 30_000) {
     const rolimonsItemDetails =
-      await new RolimonsService().findManyRolimonsItemsDetails();
+      await this.#rolimonsService.findManyRolimonsItemsDetails();
 
     const ignoreProduct =
       rolimonsItemDetails.itemDetails[0][1][1] == 0 &&
@@ -79,4 +102,4 @@ export class UGCLimitedSniper {
   }
 }
 
-export default UGCLimitedSniper;
+export default UGCLimitedSniperController;
