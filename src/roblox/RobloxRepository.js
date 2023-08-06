@@ -1,5 +1,5 @@
 import axios from "axios";
-import AssetDetailsFreePurchaseDTO from "./AssetDetailsFreePurchaseDTO";
+import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 import ItemsDetailsQueryParamsDTO from "./ItemsDetailsQueryParamsDTO";
 import AssetDetailsQueryParamsDTO from "./AssetDetailsQueryParamsDTO";
 
@@ -48,13 +48,13 @@ export default class RobloxRepository {
 
   /**
    *
-   * @param {AssetDetailsFreePurchaseDTO} assetDetailsFreePurchaseDTO
+   * @param {AssetDetailsPurchaseDTO} assetDetailsPurchaseDTO
    * @returns
    */
-  purchaseAssetDetails(assetDetailsFreePurchaseDTO) {
+  purchaseAssetDetails(assetDetailsPurchaseDTO) {
     return axios.post(
-      `https://apis.roblox.com/marketplace-sales/v1/item/${assetDetailsFreePurchaseDTO.collectibleItemId}/purchase-item`,
-      assetDetailsFreePurchaseDTO
+      `https://apis.roblox.com/marketplace-sales/v1/item/${assetDetailsPurchaseDTO.collectibleItemId}/purchase-item`,
+      assetDetailsPurchaseDTO
     );
   }
 }
