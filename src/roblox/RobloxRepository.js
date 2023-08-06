@@ -2,7 +2,17 @@ import axios from "axios";
 import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 
 export class RobloxRepository {
-  findManyLimitedsAssetDetails(params = {}) {
+  /**
+   * 
+   * @param {{  
+      Category: number,
+      salesTypeFilter: number,
+      SortType: number,
+      IncludeNotForSale: boolean,
+      Limit: number}} params 
+   * @returns 
+   */
+  findManyLimitedsAssetDetails(params) {
     return axios("https://catalog.roblox.com/v2/search/items/details", {
       params,
     });

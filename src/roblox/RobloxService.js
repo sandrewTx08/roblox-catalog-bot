@@ -1,4 +1,3 @@
-import axios from "axios";
 import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 import User from "../user/User";
 import RobloxRepository from "./RobloxRepository";
@@ -14,14 +13,14 @@ export class RobloxService {
     this.#robloxRepository = robloxRepository;
   }
 
-  findManyLimitedsAssetDetails(Limit = 10) {
+  findManyLimitedsAssetDetails() {
     return this.#robloxRepository
       .findManyLimitedsAssetDetails({
         Category: 1,
         salesTypeFilter: 2,
         SortType: 3,
         IncludeNotForSale: true,
-        Limit,
+        Limit: 10,
       })
       .then(({ data }) => data);
   }
@@ -61,16 +60,14 @@ export class RobloxService {
   /**
    *
    * @param {AssetDetailsPurchaseDTO} assetDetailsPurchaseDTO
+   * @param {number} userId
    * @returns
    */
   purchaseAssetDetails(assetDetailsPurchaseDTO, userId) {
     assetDetailsPurchaseDTO.expectedPurchaserId = userId;
 
-    return axios
-      .post(
-        `https://apis.roblox.com/marketplace-sales/v1/item/${assetDetailsPurchaseDTO.collectibleItemId}/purchase-item`,
-        assetDetailsPurchaseDTO
-      )
+    return this.#robloxRepository
+      .purchaseAssetDetails(assetDetailsPurchaseDTO)
       .catch(({ response }) => response);
   }
 }
