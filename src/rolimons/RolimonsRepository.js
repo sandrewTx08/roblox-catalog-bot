@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default class RolimonsRepository {
-  findManyRolimonsItemsDetails() {
+  findManyRolimonsItemsDetailsByMarketPlace() {
     return axios("https://www.rolimons.com/marketplace/new");
   }
 }

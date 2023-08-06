@@ -15,7 +15,7 @@ export default class RolimonsService {
 
   findManyRolimonsItemsDetails() {
     return this.#rolimonsRepository
-      .findManyRolimonsItemsDetails()
+      .findManyRolimonsItemsDetailsByMarketPlace()
       .then(
         ({ data }) =>
           new RolimonsItemDetails(
