@@ -2,7 +2,7 @@ import RolimonsItemDetails from "./RolimonsItemDetails";
 import RolimonsScraper from "./RolimonsScraper";
 import RolimonsRepository from "./RolimonsRepository";
 
-export class RolimonsService {
+export default class RolimonsService {
   #rolimonsRepository;
 
   /**
@@ -24,5 +24,3 @@ export class RolimonsService {
       );
   }
 }
-
-export default RolimonsService;

@@ -1,31 +1,44 @@
 import { randomUUID } from "crypto";
-import User from "../user/User";
 
-export class AssetDetailsPurchaseDTO {
+export default class AssetDetailsPurchaseDTO {
   expectedSellerId;
   collectibleProductId;
   expectedPurchaserId;
   collectibleItemId;
-  expectedPrice = 0;
-  expectedCurrency = 1;
-  expectedSellerType = "User";
+  expectedPrice;
+  expectedCurrency;
+  expectedSellerType;
+  expectedPurchaserType;
   idempotencyKey = randomUUID();
-  expectedPurchaserType = "User";
 
   /**
-   * @param {string} collectibleItemId
-   * @param {number} collectibleProductId
+   *
    * @param {number} expectedSellerIdOrcreatorTargetId
+   * @param {number} collectibleProductId
+   * @param {number} expectedPurchaserId
+   * @param {string} collectibleItemId
+   * @param {number} expectedPrice
+   * @param {number} expectedCurrency
+   * @param {string} expectedSellerType
+   * @param {string} expectedPurchaserType
    */
   constructor(
-    collectibleItemId,
+    expectedSellerIdOrcreatorTargetId,
     collectibleProductId,
-    expectedSellerIdOrcreatorTargetId
+    expectedPurchaserId,
+    collectibleItemId,
+    expectedPrice,
+    expectedCurrency,
+    expectedSellerType,
+    expectedPurchaserType
   ) {
-    this.collectibleItemId = collectibleItemId;
-    this.collectibleProductId = collectibleProductId;
     this.expectedSellerId = expectedSellerIdOrcreatorTargetId;
+    this.collectibleProductId = collectibleProductId;
+    this.expectedPurchaserId = expectedPurchaserId;
+    this.collectibleItemId = collectibleItemId;
+    this.expectedPrice = expectedPrice;
+    this.expectedCurrency = expectedCurrency;
+    this.expectedPurchaserType = expectedPurchaserType;
+    this.expectedSellerType = expectedSellerType;
   }
 }
-
-export default AssetDetailsPurchaseDTO;

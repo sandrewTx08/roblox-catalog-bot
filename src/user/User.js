@@ -1,4 +1,4 @@
-export class User {
+export default class User {
   id;
 
   /**
@@ -9,5 +9,3 @@ export class User {
     this.id = id;
   }
 }
-
-export default User;

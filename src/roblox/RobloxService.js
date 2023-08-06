@@ -1,8 +1,10 @@
-import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
+import AssetDetailsFreePurchaseDTO from "./AssetDetailsFreePurchaseDTO";
 import User from "../user/User";
 import RobloxRepository from "./RobloxRepository";
+import ItemsDetailsQueryParamsDTO from "./ItemsDetailsQueryParamsDTO";
+import AssetDetailsQueryParamsDTO from "./AssetDetailsQueryParamsDTO";
 
-export class RobloxService {
+export default class RobloxService {
   #robloxRepository;
 
   /**
@@ -13,35 +15,34 @@ export class RobloxService {
     this.#robloxRepository = robloxRepository;
   }
 
-  findManyLimitedsAssetDetails() {
+  findManyCollectableAssetDetails() {
     return this.#robloxRepository
-      .findManyLimitedsAssetDetails({
-        Category: 1,
-        salesTypeFilter: 2,
-        SortType: 3,
-        IncludeNotForSale: true,
-        Limit: 10,
-      })
+      .findManyAssetDetails(new AssetDetailsQueryParamsDTO(1, 2, 3, true, 10))
       .then(({ data }) => data);
   }
 
   getXCsrfToken() {
     return this.#robloxRepository
-      .getXCsrfToken()
+      .getXCsrfTokenByEmailValidation()
       .catch(({ response }) => response)
       .then(({ headers }) => headers["x-csrf-token"]);
   }
 
   getUser() {
     return this.#robloxRepository
-      .getUserByEmailSignInValidation()
+      .getUserByXCsrfToken()
       .catch(({ response }) => response)
       .then(({ data }) => new User(data.id));
   }
 
-  findOneCatalogDetailByProductId(productId) {
+  /**
+   *
+   * @param {ItemsDetailsQueryParamsDTO} itemsDetailsQueryParamsDTO
+   * @returns
+   */
+  findFirstCatalogDetailByItemDetails(itemsDetailsQueryParamsDTO) {
     return this.#robloxRepository
-      .findOneCatalogDetailByProductId(productId)
+      .findManyCatalogDetailByItemsDetails([itemsDetailsQueryParamsDTO])
       .then(
         ({
           data: {
@@ -51,25 +52,28 @@ export class RobloxService {
       );
   }
 
-  findOneAssetDetailsByCollectibleItemId(collectibleItemId) {
+  /**
+   *
+   * @param {string} collectibleItemId
+   * @returns
+   */
+  findFirstAssetDetailsByCollectibleItemIds(collectibleItemId) {
     return this.#robloxRepository
-      .findOneAssetDetailsByCollectibleItemId(collectibleItemId)
+      .findManyAssetDetailsByCollectibleItemIds([collectibleItemId])
       .then(({ data: [assetDetails] }) => assetDetails);
   }
 
   /**
    *
-   * @param {AssetDetailsPurchaseDTO} assetDetailsPurchaseDTO
+   * @param {AssetDetailsFreePurchaseDTO} assetDetailsFreePurchaseDTO
    * @param {number} userId
    * @returns
    */
-  purchaseAssetDetails(assetDetailsPurchaseDTO, userId) {
-    assetDetailsPurchaseDTO.expectedPurchaserId = userId;
+  purchaseFreeAssetDetails(assetDetailsFreePurchaseDTO, userId) {
+    assetDetailsFreePurchaseDTO.expectedPurchaserId = userId;
 
     return this.#robloxRepository
-      .purchaseAssetDetails(assetDetailsPurchaseDTO)
+      .purchaseAssetDetails(assetDetailsFreePurchaseDTO)
       .catch(({ response }) => response);
   }
 }
-
-export default RobloxService;

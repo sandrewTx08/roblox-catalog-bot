@@ -1,4 +1,4 @@
-export class RolimonsItemDetails {
+export default class RolimonsItemDetails {
   itemDetails;
 
   constructor(itemDetails) {
@@ -29,5 +29,3 @@ export class RolimonsItemDetails {
     );
   }
 }
-
-export default RolimonsItemDetails;

@@ -1,13 +1,14 @@
-import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO";
+import AssetDetailsFreePurchaseDTO from "../roblox/AssetDetailsFreePurchaseDTO";
 import User from "../user/User";
 import RobloxRepository from "../roblox/RobloxRepository";
 import RobloxService from "../roblox/RobloxService";
 import RolimonsItemDetails from "../rolimons/RolimonsItemDetails";
-import RolimonsRespository from "../rolimons/RolimonsRepository";
+import RolimonsRepository from "../rolimons/RolimonsRepository";
 import RolimonsService from "../rolimons/RolimonsService";
 import axios from "axios";
+import ItemsDetailsQueryParamsDTO from "../roblox/ItemsDetailsQueryParamsDTO";
 
-export class UGCLimitedSniperController {
+export default class UGCLimitedSniperController {
   #robloxService;
   #rolimonsService;
 
@@ -19,7 +20,7 @@ export class UGCLimitedSniperController {
 
   constructor(ROBLOSECURITY) {
     axios.defaults.headers.common.Cookie = `.ROBLOSECURITY=${ROBLOSECURITY};`;
-    this.#rolimonsService = new RolimonsService(new RolimonsRespository());
+    this.#rolimonsService = new RolimonsService(new RolimonsRepository());
     this.#robloxService = new RobloxService(new RobloxRepository());
   }
 
@@ -55,15 +56,15 @@ export class UGCLimitedSniperController {
         : true
     ) {
       const assetDetails =
-        await this.#robloxService.findOneAssetDetailsByCollectibleItemId(
+        await this.#robloxService.findFirstAssetDetailsByCollectibleItemIds(
           catalogDetails.collectibleItemId
         );
 
-      return this.#robloxService.purchaseAssetDetails(
-        new AssetDetailsPurchaseDTO(
-          catalogDetails.collectibleItemId,
+      return this.#robloxService.purchaseFreeAssetDetails(
+        new AssetDetailsFreePurchaseDTO(
+          catalogDetails.creatorTargetId,
           assetDetails.collectibleProductId,
-          catalogDetails.creatorTargetId
+          catalogDetails.collectibleItemId
         ),
         this.#user.id
       );
@@ -74,18 +75,21 @@ export class UGCLimitedSniperController {
     const rolimonsItemDetails =
       await this.#rolimonsService.findManyRolimonsItemsDetails();
 
-    const ignoreProduct =
+    const notIgnoreProduct =
       rolimonsItemDetails.itemDetails[0][1][1] == 0 &&
       RolimonsItemDetails.formatTimestamp(
         rolimonsItemDetails.itemDetails[0][1][2]
       ).getTime() +
         ignoreProductAfter >
-        new Date().getTime();
+        Date.now();
 
-    if (ignoreProduct) {
+    if (notIgnoreProduct) {
       const catalogDetails =
-        await this.#robloxService.findOneCatalogDetailByProductId(
-          rolimonsItemDetails.itemDetails[0][0]
+        await this.#robloxService.findFirstCatalogDetailByItemDetails(
+          new ItemsDetailsQueryParamsDTO(
+            "Asset",
+            Number.parseInt(rolimonsItemDetails.itemDetails[0][0])
+          )
         );
 
       return this.spamPurchaseCatalogDetails(catalogDetails);
@@ -95,11 +99,9 @@ export class UGCLimitedSniperController {
   async snipeRobloxCatalogLastProduct() {
     const {
       data: [catalogDetails],
-    } = await this.#robloxService.findManyLimitedsAssetDetails();
+    } = await this.#robloxService.findManyCollectableAssetDetails();
 
     if (catalogDetails.price == 0)
       return this.spamPurchaseCatalogDetails(catalogDetails);
   }
 }
-
-export default UGCLimitedSniperController;

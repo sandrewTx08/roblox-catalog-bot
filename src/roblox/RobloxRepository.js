@@ -1,55 +1,60 @@
 import axios from "axios";
-import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
+import AssetDetailsFreePurchaseDTO from "./AssetDetailsFreePurchaseDTO";
+import ItemsDetailsQueryParamsDTO from "./ItemsDetailsQueryParamsDTO";
+import AssetDetailsQueryParamsDTO from "./AssetDetailsQueryParamsDTO";
 
-export class RobloxRepository {
+export default class RobloxRepository {
   /**
-   * 
-   * @param {{  
-      Category: number,
-      salesTypeFilter: number,
-      SortType: number,
-      IncludeNotForSale: boolean,
-      Limit: number}} params 
-   * @returns 
+   *
+   * @param {AssetDetailsQueryParamsDTO} assetDetailsQueryParamsDTO
+   * @returns
    */
-  findManyLimitedsAssetDetails(params) {
+  findManyAssetDetails(assetDetailsQueryParamsDTO) {
     return axios("https://catalog.roblox.com/v2/search/items/details", {
-      params,
+      params: assetDetailsQueryParamsDTO,
     });
   }
 
-  getXCsrfToken() {
+  getXCsrfTokenByEmailValidation() {
     return axios.post("https://accountsettings.roblox.com/v1/email");
   }
 
-  getUserByEmailSignInValidation() {
+  getUserByXCsrfToken() {
     return axios("https://users.roblox.com/v1/users/authenticated");
   }
 
-  findOneCatalogDetailByProductId(productId) {
+  /**
+   *
+   * @param {ItemsDetailsQueryParamsDTO[]} itemsDetailsQueryParamsDTO
+   * @returns
+   */
+  findManyCatalogDetailByItemsDetails(itemsDetailsQueryParamsDTO) {
     return axios.post("https://catalog.roblox.com/v1/catalog/items/details", {
-      items: [{ itemType: "Asset", id: productId }],
+      items: itemsDetailsQueryParamsDTO,
     });
   }
 
-  findOneAssetDetailsByCollectibleItemId(collectibleItemId) {
+  /**
+   *
+   * @param {string[]} collectibleItemIds
+   * @returns
+   */
+  findManyAssetDetailsByCollectibleItemIds(collectibleItemIds) {
     return axios.post(
       "https://apis.roblox.com/marketplace-items/v1/items/details",
-      { itemIds: [collectibleItemId] }
+      { itemIds: collectibleItemIds }
     );
   }
 
   /**
    *
-   * @param {AssetDetailsPurchaseDTO} assetDetailsPurchaseDTO
+   * @param {AssetDetailsFreePurchaseDTO} assetDetailsFreePurchaseDTO
    * @returns
    */
-  purchaseAssetDetails(assetDetailsPurchaseDTO) {
+  purchaseAssetDetails(assetDetailsFreePurchaseDTO) {
     return axios.post(
-      `https://apis.roblox.com/marketplace-sales/v1/item/${assetDetailsPurchaseDTO.collectibleItemId}/purchase-item`,
-      assetDetailsPurchaseDTO
+      `https://apis.roblox.com/marketplace-sales/v1/item/${assetDetailsFreePurchaseDTO.collectibleItemId}/purchase-item`,
+      assetDetailsFreePurchaseDTO
     );
   }
 }
-
-export default RobloxRepository;
