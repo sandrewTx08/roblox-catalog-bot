@@ -1,4 +1,4 @@
-import Scraper from "./../Scraper.js";
+import Scraper from "./../Scraper";
 
 export class RolimonsScraper extends Scraper {
   constructor(data) {

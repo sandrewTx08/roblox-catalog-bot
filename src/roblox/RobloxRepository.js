@@ -1,5 +1,5 @@
 import axios from "axios";
-import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO.js";
+import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 
 export class RobloxRepository {
   findManyLimitedsAssetDetails(params = {}) {

@@ -1,4 +1,4 @@
 export {
   UGCLimitedSniperController as UGCLimitedSniper,
   UGCLimitedSniperController as default,
-} from "./ugc-limited-sniper/UGCLimitedSniperController.js";
+} from "./ugc-limited-sniper/UGCLimitedSniperController";

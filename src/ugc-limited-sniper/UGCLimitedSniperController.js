@@ -1,10 +1,10 @@
-import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO.js";
-import User from "../user/User.js";
-import RobloxRepository from "../roblox/RobloxRepository.js";
-import RobloxService from "../roblox/RobloxService.js";
-import RolimonsItemDetails from "../rolimons/RolimonsItemDetails.js";
-import RolimonsRespository from "../rolimons/RolimonsRepository.js";
-import RolimonsService from "../rolimons/RolimonsService.js";
+import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO";
+import User from "../user/User";
+import RobloxRepository from "../roblox/RobloxRepository";
+import RobloxService from "../roblox/RobloxService";
+import RolimonsItemDetails from "../rolimons/RolimonsItemDetails";
+import RolimonsRespository from "../rolimons/RolimonsRepository";
+import RolimonsService from "../rolimons/RolimonsService";
 import axios from "axios";
 
 export class UGCLimitedSniperController {

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import User from "../user/User.js";
+import User from "../user/User";
 
 export class AssetDetailsPurchaseDTO {
   expectedSellerId;

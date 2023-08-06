@@ -1,7 +1,7 @@
 import axios from "axios";
-import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO.js";
-import User from "../user/User.js";
-import RobloxRepository from "./RobloxRepository.js";
+import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
+import User from "../user/User";
+import RobloxRepository from "./RobloxRepository";
 
 export class RobloxService {
   #robloxRepository;

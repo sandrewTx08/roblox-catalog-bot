@@ -1,6 +1,6 @@
-import RolimonsItemDetails from "./RolimonsItemDetails.js";
-import RolimonsScraper from "./RolimonsScraper.js";
-import RolimonsRepository from "./RolimonsRepository.js";
+import RolimonsItemDetails from "./RolimonsItemDetails";
+import RolimonsScraper from "./RolimonsScraper";
+import RolimonsRepository from "./RolimonsRepository";
 
 export class RolimonsService {
   #rolimonsRepository;
