@@ -54,6 +54,17 @@ export default class RobloxService {
 
   /**
    *
+   * @param {ItemsDetailsQueryParamsDTO[]} itemsDetailsQueryParamsDTO
+   * @returns
+   */
+  findManyCatalogDetailByItemsDetails(itemsDetailsQueryParamsDTO) {
+    return this.#robloxRepository
+      .findManyCatalogDetailByItemsDetails(itemsDetailsQueryParamsDTO)
+      .then(({ data: { data: catalogDetails } }) => catalogDetails);
+  }
+
+  /**
+   *
    * @param {string} collectibleItemId
    * @returns
    */
@@ -61,6 +72,17 @@ export default class RobloxService {
     return this.#robloxRepository
       .findManyAssetDetailsByCollectibleItemIds([collectibleItemId])
       .then(({ data: [assetDetails] }) => assetDetails);
+  }
+
+  /**
+   *
+   * @param {string[]} collectibleItemsIds
+   * @returns
+   */
+  findManyAssetDetailsByCollectibleItemIds(collectibleItemsIds) {
+    return this.#robloxRepository
+      .findManyAssetDetailsByCollectibleItemIds(collectibleItemsIds)
+      .then(({ data }) => data);
   }
 
   /**
