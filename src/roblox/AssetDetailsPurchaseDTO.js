@@ -13,7 +13,7 @@ export default class AssetDetailsPurchaseDTO {
 
   /**
    *
-   * @param {number} expectedSellerIdOrcreatorTargetId
+   * @param {number} expectedSellerIdOrCreatorTargetId
    * @param {number} collectibleProductId
    * @param {number} expectedPurchaserId
    * @param {string} collectibleItemId
@@ -23,7 +23,7 @@ export default class AssetDetailsPurchaseDTO {
    * @param {string} expectedPurchaserType
    */
   constructor(
-    expectedSellerIdOrcreatorTargetId,
+    expectedSellerIdOrCreatorTargetId,
     collectibleProductId,
     expectedPurchaserId,
     collectibleItemId,
@@ -32,7 +32,7 @@ export default class AssetDetailsPurchaseDTO {
     expectedSellerType,
     expectedPurchaserType
   ) {
-    this.expectedSellerId = expectedSellerIdOrcreatorTargetId;
+    this.expectedSellerId = expectedSellerIdOrCreatorTargetId;
     this.collectibleProductId = collectibleProductId;
     this.expectedPurchaserId = expectedPurchaserId;
     this.collectibleItemId = collectibleItemId;

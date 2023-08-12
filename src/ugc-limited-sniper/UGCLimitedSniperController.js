@@ -7,14 +7,16 @@ import RobloxService from "../roblox/RobloxService";
 import RolimonsService from "../rolimons/RolimonsService";
 
 export default class UGCLimitedSniperController {
-  #robloxService;
-  #rolimonsService;
-
   /**
    *
    * @type {User}
    */
   #user;
+  #robloxService;
+  #rolimonsService;
+
+  spamMultiplier = 20;
+  checkAvailableForConsumption = false;
 
   /**
    *
@@ -25,9 +27,6 @@ export default class UGCLimitedSniperController {
     this.#robloxService = robloxRepository;
     this.#rolimonsService = rolimonsService;
   }
-
-  spamMultiplier = 20;
-  checkAvailableForConsumption = false;
 
   setUser() {
     return this.#robloxService
@@ -45,15 +44,13 @@ export default class UGCLimitedSniperController {
     });
   }
 
-  spamPurchaseCatalogDetails(catalogDetails) {
-    const purchases = [];
-
-    for (let multiplier = 0; multiplier < this.spamMultiplier; multiplier++)
-      purchases.push(this.purchaseOneCatalogDetails(catalogDetails));
-
-    return Promise.all(purchases);
-  }
-
+  /**
+   *
+   * @param {number} expectedSellerIdOrcreatorTargetId
+   * @param {number} collectibleProductId
+   * @param {string} collectibleItemId
+   * @returns
+   */
   purchaseFreeAssetDetails(
     expectedSellerIdOrcreatorTargetId,
     collectibleProductId,
@@ -69,23 +66,48 @@ export default class UGCLimitedSniperController {
     );
   }
 
-  async purchaseOneCatalogDetails(catalogDetails) {
-    if (
-      this.checkAvailableForConsumption
-        ? catalogDetails.unitsAvailableForConsumption > 0
-        : true
-    ) {
-      const assetDetails =
-        await this.#robloxService.findFirstAssetDetailsByCollectibleItemIds(
-          catalogDetails.collectibleItemId
-        );
+  /**
+   *
+   * @param {any[]} catalogsDetailsOrAssetDetails
+   * @returns
+   */
+  async spamManyPurchaseByCatalogsDetailsOrAssetDetails(
+    catalogsDetailsOrAssetDetails
+  ) {
+    const purchases = [];
 
-      return this.purchaseFreeAssetDetails(
-        catalogDetails.creatorTargetId,
-        assetDetails.collectibleProductId,
-        catalogDetails.collectibleItemId
-      );
+    const isCatalogDetails = catalogsDetailsOrAssetDetails.reduce(
+      (p, c) => "collectibleProductId" in c || p,
+      false
+    );
+
+    const assetsDetails = isCatalogDetails
+      ? await this.#robloxService.findManyAssetDetailsByCollectibleItemIds(
+          catalogsDetailsOrAssetDetails.map(
+            ({ collectibleItemId }) => collectibleItemId
+          )
+        )
+      : catalogsDetailsOrAssetDetails;
+
+    for (const assetDetails of assetsDetails) {
+      if (
+        this.checkAvailableForConsumption
+          ? assetDetails.unitsAvailableForConsumption > 0
+          : true
+      ) {
+        for (let m = 0; m < this.spamMultiplier; m++) {
+          purchases.push(
+            this.purchaseFreeAssetDetails(
+              assetDetails.creatorId,
+              assetDetails.collectibleProductId,
+              assetDetails.collectibleItemId
+            )
+          );
+        }
+      }
     }
+
+    return Promise.all(purchases);
   }
 
   async snipeRolimonsCatalogLastProduct(ignoreProductAfter = 30_000) {
@@ -109,7 +131,9 @@ export default class UGCLimitedSniperController {
           )
         );
 
-      return this.spamPurchaseCatalogDetails(catalogDetails);
+      return this.spamManyPurchaseByCatalogsDetailsOrAssetDetails([
+        catalogDetails,
+      ]);
     }
   }
 
@@ -119,37 +143,23 @@ export default class UGCLimitedSniperController {
     } = await this.#robloxService.findManyCollectableAssetDetails();
 
     if (catalogDetails.price == 0)
-      return this.spamPurchaseCatalogDetails(catalogDetails);
+      return this.spamManyPurchaseByCatalogsDetailsOrAssetDetails([
+        catalogDetails,
+      ]);
   }
 
   /**
    *
    * @param {number[]} productsId
    */
-  async snipeProductsById(productsId) {
-    const productsCatalogDetails =
+  async snipeProductByIds(productsId) {
+    const productCatalogDetails =
       await this.#robloxService.findManyCatalogDetailByItemsDetails(
         productsId.map(
           (productId) => new ItemsDetailsQueryParamsDTO("Asset", productId)
         )
       );
 
-    const productsAssetDetails =
-      await this.#robloxService.findManyAssetDetailsByCollectibleItemIds(
-        productsCatalogDetails.map(
-          (catalogDetails) => catalogDetails.collectibleItemId
-        )
-      );
-
-    return Promise.all(
-      productsAssetDetails.map(
-        ({ creatorId, collectibleProductId, collectibleItemId }) =>
-          this.purchaseFreeAssetDetails(
-            creatorId,
-            collectibleProductId,
-            collectibleItemId
-          )
-      )
-    );
+    this.spamManyPurchaseByCatalogsDetailsOrAssetDetails(productCatalogDetails);
   }
 }

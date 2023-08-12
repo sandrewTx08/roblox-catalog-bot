@@ -3,17 +3,17 @@ import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 export default class AssetDetailsFreePurchaseDTO extends AssetDetailsPurchaseDTO {
   /**
    *
-   * @param {number} expectedSellerIdOrcreatorTargetId
+   * @param {number} expectedSellerIdOrCreatorTargetId
    * @param {number} collectibleProductId
    * @param {string} collectibleItemId
    */
   constructor(
-    expectedSellerIdOrcreatorTargetId,
+    expectedSellerIdOrCreatorTargetId,
     collectibleProductId,
     collectibleItemId
   ) {
     super(
-      expectedSellerIdOrcreatorTargetId,
+      expectedSellerIdOrCreatorTargetId,
       collectibleProductId,
       NaN,
       collectibleItemId,
