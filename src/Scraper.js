@@ -1,4 +1,4 @@
-export class Scraper {
+export default class Scraper {
   data;
 
   /**
@@ -9,5 +9,3 @@ export class Scraper {
     this.data = data;
   }
 }
-
-export default Scraper;

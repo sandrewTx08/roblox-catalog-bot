@@ -1,28 +1,33 @@
 import AssetDetailsFreePurchaseDTO from "../roblox/AssetDetailsFreePurchaseDTO";
 import User from "../user/User";
-import RobloxRepository from "../roblox/RobloxRepository";
-import RobloxService from "../roblox/RobloxService";
 import RolimonsItemDetails from "../rolimons/RolimonsItemDetails";
-import RolimonsRepository from "../rolimons/RolimonsRepository";
-import RolimonsService from "../rolimons/RolimonsService";
 import axios from "axios";
 import ItemsDetailsQueryParamsDTO from "../roblox/ItemsDetailsQueryParamsDTO";
+import RobloxService from "../roblox/RobloxService";
+import RolimonsService from "../rolimons/RolimonsService";
 
 export default class UGCLimitedSniperController {
   #robloxService;
   #rolimonsService;
 
-  /** @type {User} */
+  /**
+   *
+   * @type {User}
+   */
   #user;
+
+  /**
+   *
+   * @param {RobloxService} robloxRepository
+   * @param {RolimonsService} rolimonsService
+   */
+  constructor(robloxRepository, rolimonsService) {
+    this.#robloxService = robloxRepository;
+    this.#rolimonsService = rolimonsService;
+  }
 
   spamMultiplier = 20;
   checkAvailableForConsumption = false;
-
-  constructor(ROBLOSECURITY) {
-    axios.defaults.headers.common.Cookie = `.ROBLOSECURITY=${ROBLOSECURITY};`;
-    this.#rolimonsService = new RolimonsService(new RolimonsRepository());
-    this.#robloxService = new RobloxService(new RobloxRepository());
-  }
 
   setUser() {
     return this.#robloxService

@@ -1,11 +1,6 @@
 import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 
 export default class AssetDetailsFreePurchaseDTO extends AssetDetailsPurchaseDTO {
-  expectedSellerId;
-  collectibleProductId;
-  expectedPurchaserId;
-  collectibleItemId;
-
   /**
    *
    * @param {number} expectedSellerIdOrcreatorTargetId

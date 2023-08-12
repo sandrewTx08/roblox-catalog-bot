@@ -1,6 +1,10 @@
 import Scraper from "./../Scraper";
 
 export default class RolimonsScraper extends Scraper {
+  /**
+   *
+   * @param {string} data
+   */
   constructor(data) {
     super(data);
   }

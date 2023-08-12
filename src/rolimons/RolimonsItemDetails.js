@@ -1,6 +1,10 @@
 export default class RolimonsItemDetails {
   itemDetails;
 
+  /**
+   *
+   * @param {{[x: string] : any}} itemDetails
+   */
   constructor(itemDetails) {
     this.itemDetails = Object.entries(itemDetails);
     this.#sortByTimestamp();

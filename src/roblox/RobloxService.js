@@ -31,7 +31,6 @@ export default class RobloxService {
   getUser() {
     return this.#robloxRepository
       .getUserByXCsrfToken()
-      .catch(({ response }) => response)
       .then(({ data }) => new User(data.id));
   }
 
@@ -94,8 +93,8 @@ export default class RobloxService {
   purchaseFreeAssetDetails(assetDetailsFreePurchaseDTO, userId) {
     assetDetailsFreePurchaseDTO.expectedPurchaserId = userId;
 
-    return this.#robloxRepository
-      .purchaseAssetDetails(assetDetailsFreePurchaseDTO)
-      .catch(({ response }) => response);
+    return this.#robloxRepository.purchaseAssetDetails(
+      assetDetailsFreePurchaseDTO
+    );
   }
 }
