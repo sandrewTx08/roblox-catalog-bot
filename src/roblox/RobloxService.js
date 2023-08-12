@@ -1,4 +1,4 @@
-import AssetDetailsFreePurchaseDTO from "./AssetDetailsFreePurchaseDTO";
+import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 import User from "../user/User";
 import RobloxRepository from "./RobloxRepository";
 import ItemsDetailsQueryParamsDTO from "./ItemsDetailsQueryParamsDTO";
@@ -18,7 +18,7 @@ export default class RobloxService {
   findManyCollectableAssetDetails() {
     return this.#robloxRepository
       .findManyAssetDetails(new AssetDetailsQueryParamsDTO(1, 2, 3, true, 10))
-      .then(({ data }) => data);
+      .then(({ data: { data } }) => data);
   }
 
   getXCsrfToken() {
@@ -86,15 +86,10 @@ export default class RobloxService {
 
   /**
    *
-   * @param {AssetDetailsFreePurchaseDTO} assetDetailsFreePurchaseDTO
-   * @param {number} userId
+   * @param {AssetDetailsPurchaseDTO} assetDetailsPurchaseDTO
    * @returns
    */
-  purchaseFreeAssetDetails(assetDetailsFreePurchaseDTO, userId) {
-    assetDetailsFreePurchaseDTO.expectedPurchaserId = userId;
-
-    return this.#robloxRepository.purchaseAssetDetails(
-      assetDetailsFreePurchaseDTO
-    );
+  purchaseAssetDetails(assetDetailsPurchaseDTO) {
+    return this.#robloxRepository.purchaseAssetDetails(assetDetailsPurchaseDTO);
   }
 }

@@ -1,14 +1,14 @@
 import { randomUUID } from "crypto";
 
 export default class AssetDetailsPurchaseDTO {
-  expectedSellerId;
   collectibleProductId;
-  expectedPurchaserId;
   collectibleItemId;
   expectedPrice;
-  expectedCurrency;
+  expectedSellerId;
   expectedSellerType;
-  expectedPurchaserType;
+  expectedPurchaserId;
+  expectedPurchaserType = "User";
+  expectedCurrency = 1;
   idempotencyKey = randomUUID();
 
   /**
@@ -18,9 +18,7 @@ export default class AssetDetailsPurchaseDTO {
    * @param {number} expectedPurchaserId
    * @param {string} collectibleItemId
    * @param {number} expectedPrice
-   * @param {number} expectedCurrency
    * @param {string} expectedSellerType
-   * @param {string} expectedPurchaserType
    */
   constructor(
     expectedSellerIdOrCreatorTargetId,
@@ -28,17 +26,13 @@ export default class AssetDetailsPurchaseDTO {
     expectedPurchaserId,
     collectibleItemId,
     expectedPrice,
-    expectedCurrency,
-    expectedSellerType,
-    expectedPurchaserType
+    expectedSellerType
   ) {
     this.expectedSellerId = expectedSellerIdOrCreatorTargetId;
     this.collectibleProductId = collectibleProductId;
     this.expectedPurchaserId = expectedPurchaserId;
     this.collectibleItemId = collectibleItemId;
     this.expectedPrice = expectedPrice;
-    this.expectedCurrency = expectedCurrency;
-    this.expectedPurchaserType = expectedPurchaserType;
     this.expectedSellerType = expectedSellerType;
   }
 }

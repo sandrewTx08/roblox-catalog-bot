@@ -1,10 +1,10 @@
-import AssetDetailsFreePurchaseDTO from "../roblox/AssetDetailsFreePurchaseDTO";
 import User from "../user/User";
 import RolimonsItemDetails from "../rolimons/RolimonsItemDetails";
 import axios from "axios";
 import ItemsDetailsQueryParamsDTO from "../roblox/ItemsDetailsQueryParamsDTO";
 import RobloxService from "../roblox/RobloxService";
 import RolimonsService from "../rolimons/RolimonsService";
+import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO";
 
 export default class UGCLimitedSniperController {
   /**
@@ -15,8 +15,9 @@ export default class UGCLimitedSniperController {
   #robloxService;
   #rolimonsService;
 
-  spamMultiplier = 20;
-  checkAvailableForConsumption = false;
+  maxPrice = 2;
+  spamMultiplier = 4;
+  checkAvailableForConsumption = true;
 
   /**
    *
@@ -45,27 +46,11 @@ export default class UGCLimitedSniperController {
 
   /**
    *
-   * @param {number} creatorId
-   * @param {string} collectibleProductId
-   * @param {string} collectibleItemId
-   */
-  purchaseFreeAssetDetails(creatorId, collectibleProductId, collectibleItemId) {
-    this.#robloxService.purchaseFreeAssetDetails(
-      new AssetDetailsFreePurchaseDTO(
-        creatorId,
-        collectibleProductId,
-        collectibleItemId
-      ),
-      this.#user.id
-    );
-  }
-
-  /**
-   *
+   * @see {@link UGCLimitedSniperController.spamMultiplier}
    * @param {any[]} catalogsDetailsOrAssetDetails
    * @returns
    */
-  async spamManyFreePurchasesByCatalogsDetailsOrAssetDetails(
+  async spamManyPurchasesByCatalogsDetailsOrAssetDetails(
     catalogsDetailsOrAssetDetails
   ) {
     const purchases = [];
@@ -85,16 +70,20 @@ export default class UGCLimitedSniperController {
 
     for (const assetDetails of assetsDetails) {
       if (
-        this.checkAvailableForConsumption
+        assetDetails.price <= this.maxPrice &&
+        (this.checkAvailableForConsumption
           ? assetDetails.unitsAvailableForConsumption > 0
-          : true
+          : true)
       ) {
         for (let m = 0; m < this.spamMultiplier; m++) {
-          purchases.push(
-            this.purchaseFreeAssetDetails(
+          this.#robloxService.purchaseAssetDetails(
+            new AssetDetailsPurchaseDTO(
               assetDetails.creatorId,
               assetDetails.collectibleProductId,
-              assetDetails.collectibleItemId
+              this.#user.id,
+              assetDetails.collectibleItemId,
+              assetDetails.price,
+              assetDetails.creatorType
             )
           );
         }
@@ -125,21 +114,18 @@ export default class UGCLimitedSniperController {
           )
         );
 
-      return this.spamManyFreePurchasesByCatalogsDetailsOrAssetDetails([
+      return this.spamManyPurchasesByCatalogsDetailsOrAssetDetails([
         catalogDetails,
       ]);
     }
   }
 
-  async snipeRobloxCatalogLastProduct() {
-    const {
-      data: [catalogDetails],
-    } = await this.#robloxService.findManyCollectableAssetDetails();
-
-    if (catalogDetails.price == 0)
-      return this.spamManyFreePurchasesByCatalogsDetailsOrAssetDetails([
-        catalogDetails,
-      ]);
+  snipeRobloxAssetsDetails() {
+    return this.#robloxService
+      .findManyCollectableAssetDetails()
+      .then((assetsDetails) =>
+        this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(assetsDetails)
+      );
   }
 
   /**
@@ -154,7 +140,7 @@ export default class UGCLimitedSniperController {
         )
       );
 
-    this.spamManyFreePurchasesByCatalogsDetailsOrAssetDetails(
+    this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(
       productCatalogDetails
     );
   }

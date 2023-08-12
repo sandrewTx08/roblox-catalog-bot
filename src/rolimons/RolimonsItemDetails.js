@@ -3,11 +3,11 @@ export default class RolimonsItemDetails {
 
   /**
    *
-   * @param {{[x: string] : any}} itemDetails
+   * @param {{[x: string]: any}} itemDetails
    */
   constructor(itemDetails) {
     this.itemDetails = Object.entries(itemDetails);
-    this.#sortByTimestamp();
+    this.#sortByDescTimestamp();
   }
 
   /**
@@ -27,7 +27,7 @@ export default class RolimonsItemDetails {
     return new Date(Number(timestampArr.join("")));
   }
 
-  #sortByTimestamp() {
+  #sortByDescTimestamp() {
     this.itemDetails = this.itemDetails.sort(
       (asc, desc) => desc[1][2] - asc[1][2]
     );
