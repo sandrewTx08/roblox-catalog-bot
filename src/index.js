@@ -7,11 +7,7 @@ import axios from "axios";
 import UGCLimitedSniperController from "./ugc-limited-sniper/UGCLimitedSniperController";
 
 export default class UGCLimitedSniper {
-  /**
-   *
-   * @type {ContainerBuilder}
-   */
-  #container;
+  #container = new ContainerBuilder();
 
   /**
    *
@@ -20,8 +16,6 @@ export default class UGCLimitedSniper {
    */
   constructor(ROBLOSECURITY) {
     axios.defaults.headers.common.Cookie = `.ROBLOSECURITY=${ROBLOSECURITY};`;
-
-    this.#container = new ContainerBuilder();
 
     this.#container.register(RolimonsRepository.name, RolimonsRepository);
     this.#container

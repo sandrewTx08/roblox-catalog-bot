@@ -19,7 +19,7 @@ export default class RobloxRepository {
     return axios.post("https://accountsettings.roblox.com/v1/email");
   }
 
-  getUserByXCsrfToken() {
+  getUser() {
     return axios("https://users.roblox.com/v1/users/authenticated");
   }
 

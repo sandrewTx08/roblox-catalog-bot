@@ -29,36 +29,30 @@ export default class UGCLimitedSniperController {
   }
 
   setUser() {
-    return this.#robloxService
-      .getUser()
-      .catch(({ response }) => response)
-      .then((user) => {
-        this.#user = user;
-      });
+    return this.#robloxService.getUser().then((user) => {
+      this.#user = user;
+      return this;
+    });
   }
 
   setXCsrfToken() {
     return this.#robloxService.getXCsrfToken().then((xCsrfToken) => {
       axios.defaults.headers.common["x-csrf-token"] =
         xCsrfToken || axios.defaults.headers.common["x-csrf-token"] || "";
+      return this;
     });
   }
 
   /**
    *
-   * @param {number} expectedSellerIdOrcreatorTargetId
-   * @param {number} collectibleProductId
+   * @param {number} creatorId
+   * @param {string} collectibleProductId
    * @param {string} collectibleItemId
-   * @returns
    */
-  purchaseFreeAssetDetails(
-    expectedSellerIdOrcreatorTargetId,
-    collectibleProductId,
-    collectibleItemId
-  ) {
-    return this.#robloxService.purchaseFreeAssetDetails(
+  purchaseFreeAssetDetails(creatorId, collectibleProductId, collectibleItemId) {
+    this.#robloxService.purchaseFreeAssetDetails(
       new AssetDetailsFreePurchaseDTO(
-        expectedSellerIdOrcreatorTargetId,
+        creatorId,
         collectibleProductId,
         collectibleItemId
       ),
@@ -71,23 +65,23 @@ export default class UGCLimitedSniperController {
    * @param {any[]} catalogsDetailsOrAssetDetails
    * @returns
    */
-  async spamManyPurchaseByCatalogsDetailsOrAssetDetails(
+  async spamManyFreePurchasesByCatalogsDetailsOrAssetDetails(
     catalogsDetailsOrAssetDetails
   ) {
     const purchases = [];
 
-    const isCatalogDetails = catalogsDetailsOrAssetDetails.reduce(
+    const isAssetDetails = catalogsDetailsOrAssetDetails.reduce(
       (p, c) => "collectibleProductId" in c || p,
       false
     );
 
-    const assetsDetails = isCatalogDetails
-      ? await this.#robloxService.findManyAssetDetailsByCollectibleItemIds(
+    const assetsDetails = isAssetDetails
+      ? catalogsDetailsOrAssetDetails
+      : await this.#robloxService.findManyAssetDetailsByCollectibleItemIds(
           catalogsDetailsOrAssetDetails.map(
             ({ collectibleItemId }) => collectibleItemId
           )
-        )
-      : catalogsDetailsOrAssetDetails;
+        );
 
     for (const assetDetails of assetsDetails) {
       if (
@@ -131,7 +125,7 @@ export default class UGCLimitedSniperController {
           )
         );
 
-      return this.spamManyPurchaseByCatalogsDetailsOrAssetDetails([
+      return this.spamManyFreePurchasesByCatalogsDetailsOrAssetDetails([
         catalogDetails,
       ]);
     }
@@ -143,7 +137,7 @@ export default class UGCLimitedSniperController {
     } = await this.#robloxService.findManyCollectableAssetDetails();
 
     if (catalogDetails.price == 0)
-      return this.spamManyPurchaseByCatalogsDetailsOrAssetDetails([
+      return this.spamManyFreePurchasesByCatalogsDetailsOrAssetDetails([
         catalogDetails,
       ]);
   }
@@ -160,6 +154,8 @@ export default class UGCLimitedSniperController {
         )
       );
 
-    this.spamManyPurchaseByCatalogsDetailsOrAssetDetails(productCatalogDetails);
+    this.spamManyFreePurchasesByCatalogsDetailsOrAssetDetails(
+      productCatalogDetails
+    );
   }
 }

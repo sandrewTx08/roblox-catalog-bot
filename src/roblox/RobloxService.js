@@ -30,7 +30,7 @@ export default class RobloxService {
 
   getUser() {
     return this.#robloxRepository
-      .getUserByXCsrfToken()
+      .getUser()
       .then(({ data }) => new User(data.id));
   }
 

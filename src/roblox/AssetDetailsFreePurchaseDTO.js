@@ -4,7 +4,7 @@ export default class AssetDetailsFreePurchaseDTO extends AssetDetailsPurchaseDTO
   /**
    *
    * @param {number} expectedSellerIdOrCreatorTargetId
-   * @param {number} collectibleProductId
+   * @param {string} collectibleProductId
    * @param {string} collectibleItemId
    */
   constructor(

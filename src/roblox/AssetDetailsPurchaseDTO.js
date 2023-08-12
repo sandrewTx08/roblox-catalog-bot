@@ -14,7 +14,7 @@ export default class AssetDetailsPurchaseDTO {
   /**
    *
    * @param {number} expectedSellerIdOrCreatorTargetId
-   * @param {number} collectibleProductId
+   * @param {string} collectibleProductId
    * @param {number} expectedPurchaserId
    * @param {string} collectibleItemId
    * @param {number} expectedPrice
