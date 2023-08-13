@@ -133,6 +133,7 @@ export default class UGCLimitedSniperController {
   /**
    *
    * @param {number[]} productsId
+   * @returns
    */
   async snipeProductByIds(productsId) {
     const productCatalogDetails =
@@ -142,7 +143,7 @@ export default class UGCLimitedSniperController {
         )
       );
 
-    this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(
+    return this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(
       productCatalogDetails
     );
   }
