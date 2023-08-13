@@ -76,14 +76,16 @@ export default class UGCLimitedSniperController {
           : true)
       ) {
         for (let m = 0; m < this.spamMultiplier; m++) {
-          this.#robloxService.purchaseAssetDetails(
-            new AssetDetailsPurchaseDTO(
-              assetDetails.creatorId,
-              assetDetails.collectibleProductId,
-              this.#user.id,
-              assetDetails.collectibleItemId,
-              assetDetails.price,
-              assetDetails.creatorType
+          purchases.push(
+            this.#robloxService.purchaseAssetDetails(
+              new AssetDetailsPurchaseDTO(
+                assetDetails.creatorId,
+                assetDetails.collectibleProductId,
+                this.#user.id,
+                assetDetails.collectibleItemId,
+                assetDetails.price,
+                assetDetails.creatorType
+              )
             )
           );
         }

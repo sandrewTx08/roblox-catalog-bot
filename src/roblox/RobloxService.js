@@ -18,7 +18,7 @@ export default class RobloxService {
   findManyCollectableAssetDetails() {
     return this.#robloxRepository
       .findManyAssetDetails(new AssetDetailsQueryParamsDTO(1, 2, 3, true, 10))
-      .then(({ data: { data } }) => data);
+      .then(({ data: { data: assetsDetails } }) => assetsDetails);
   }
 
   getXCsrfToken() {
