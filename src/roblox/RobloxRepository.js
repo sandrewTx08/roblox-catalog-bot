@@ -1,17 +1,18 @@
 import axios from "axios";
 import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 import ItemsDetailsQueryParamsDTO from "./ItemsDetailsQueryParamsDTO";
-import AssetDetailsQueryParamsDTO from "./AssetDetailsQueryParamsDTO";
+import CatalogItemsDetailsQueryParamDTO from "./CatalogItemsDetailsQueryParamDTO";
+import ProductPurchaseDTO from "./ProductPurchaseDTO";
 
 export default class RobloxRepository {
   /**
    *
-   * @param {AssetDetailsQueryParamsDTO} assetDetailsQueryParamsDTO
+   * @param {CatalogItemsDetailsQueryParamDTO} catalogItemDetailsQueryParamDTO
    * @returns
    */
-  findManyAssetDetails(assetDetailsQueryParamsDTO) {
+  findManyAssetDetailsByCatalogItemsDetails(catalogItemDetailsQueryParamDTO) {
     return axios("https://catalog.roblox.com/v2/search/items/details", {
-      params: assetDetailsQueryParamsDTO,
+      params: catalogItemDetailsQueryParamDTO,
     });
   }
 
@@ -19,7 +20,7 @@ export default class RobloxRepository {
     return axios.post("https://accountsettings.roblox.com/v1/email");
   }
 
-  getUser() {
+  getAuthenticatedUser() {
     return axios("https://users.roblox.com/v1/users/authenticated");
   }
 
@@ -36,13 +37,13 @@ export default class RobloxRepository {
 
   /**
    *
-   * @param {string[]} collectibleItemIds
+   * @param {string[]} itemIds
    * @returns
    */
-  findManyAssetDetailsByCollectibleItemIds(collectibleItemIds) {
+  findManyAssetDetailsByItemIds(itemIds) {
     return axios.post(
       "https://apis.roblox.com/marketplace-items/v1/items/details",
-      { itemIds: collectibleItemIds }
+      { itemIds }
     );
   }
 
@@ -55,6 +56,19 @@ export default class RobloxRepository {
     return axios.post(
       `https://apis.roblox.com/marketplace-sales/v1/item/${assetDetailsPurchaseDTO.collectibleItemId}/purchase-item`,
       assetDetailsPurchaseDTO
+    );
+  }
+
+  /**
+   *
+   * @param {number} productId
+   * @param {ProductPurchaseDTO} productPurchaseDTO
+   * @returns
+   */
+  purchaseProduct(productId, productPurchaseDTO) {
+    return axios.post(
+      `https://economy.roblox.com/v1/purchases/products/${productId}`,
+      productPurchaseDTO
     );
   }
 }

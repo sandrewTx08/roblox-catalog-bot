@@ -22,9 +22,11 @@ export default class RolimonsItemDetails {
       timestampArr.splice(10, 0, "0");
       timestampArr.splice(11, 0, "0");
       timestampArr.splice(12, 0, "0");
+
+      return new Date(Number.parseInt(timestampArr.join("")));
     }
 
-    return new Date(Number(timestampArr.join("")));
+    return new Date(Number.parseInt(timestamp));
   }
 
   #sortByDescTimestamp() {

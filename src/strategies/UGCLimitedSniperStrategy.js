@@ -1,52 +1,33 @@
-import User from "../user/User";
 import RolimonsItemDetails from "../rolimons/RolimonsItemDetails";
-import axios from "axios";
 import ItemsDetailsQueryParamsDTO from "../roblox/ItemsDetailsQueryParamsDTO";
 import RobloxService from "../roblox/RobloxService";
 import RolimonsService from "../rolimons/RolimonsService";
 import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO";
+import Strategy from "../strategy/Strategy";
 
-export default class UGCLimitedSniperController {
-  /**
-   *
-   * @type {User}
-   */
-  #user;
+export default class UGCLimitedSniperStrategy extends Strategy {
   #robloxService;
   #rolimonsService;
 
-  maxPrice = 2;
+  maxPrice = 3;
   spamMultiplier = 4;
   checkAvailableForConsumption = true;
 
   /**
    *
-   * @param {RobloxService} robloxRepository
+   * @param {string} ROBLOSECURITY
+   * @param {RobloxService} robloxService
    * @param {RolimonsService} rolimonsService
    */
-  constructor(robloxRepository, rolimonsService) {
-    this.#robloxService = robloxRepository;
+  constructor(ROBLOSECURITY, robloxService, rolimonsService) {
+    super(ROBLOSECURITY, robloxService);
+    this.#robloxService = robloxService;
     this.#rolimonsService = rolimonsService;
-  }
-
-  setUser() {
-    return this.#robloxService.getUser().then((user) => {
-      this.#user = user;
-      return this;
-    });
-  }
-
-  setXCsrfToken() {
-    return this.#robloxService.getXCsrfToken().then((xCsrfToken) => {
-      axios.defaults.headers.common["x-csrf-token"] =
-        xCsrfToken || axios.defaults.headers.common["x-csrf-token"] || "";
-      return this;
-    });
   }
 
   /**
    *
-   * @see {@link UGCLimitedSniperController.spamMultiplier}
+   * @see {@link UGCLimitedSniperStrategy.spamMultiplier}
    * @param {any[]} catalogsDetailsOrAssetDetails
    * @returns
    */
@@ -62,7 +43,7 @@ export default class UGCLimitedSniperController {
 
     const assetsDetails = isAssetDetails
       ? catalogsDetailsOrAssetDetails
-      : await this.#robloxService.findManyAssetDetailsByCollectibleItemIds(
+      : await this.#robloxService.findManyAssetDetailsByItemIds(
           catalogsDetailsOrAssetDetails.map(
             ({ collectibleItemId }) => collectibleItemId
           )
@@ -81,7 +62,7 @@ export default class UGCLimitedSniperController {
               new AssetDetailsPurchaseDTO(
                 assetDetails.creatorId,
                 assetDetails.collectibleProductId,
-                this.#user.id,
+                this.user.id,
                 assetDetails.collectibleItemId,
                 assetDetails.price,
                 assetDetails.creatorType
@@ -109,12 +90,12 @@ export default class UGCLimitedSniperController {
 
     if (notIgnoreProduct) {
       const catalogDetails =
-        await this.#robloxService.findFirstCatalogDetailByItemDetails(
+        await this.#robloxService.findManyCatalogDetailByItemsDetails([
           new ItemsDetailsQueryParamsDTO(
             "Asset",
             Number.parseInt(rolimonsItemDetails.itemDetails[0][0])
-          )
-        );
+          ),
+        ]);
 
       return this.spamManyPurchasesByCatalogsDetailsOrAssetDetails([
         catalogDetails,
@@ -124,7 +105,7 @@ export default class UGCLimitedSniperController {
 
   snipeRobloxAssetsDetails() {
     return this.#robloxService
-      .findManyCollectableAssetDetails()
+      .findManyCollectableAssetDetails(this.maxPrice)
       .then((assetsDetails) =>
         this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(assetsDetails)
       );

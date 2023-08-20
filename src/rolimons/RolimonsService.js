@@ -19,7 +19,7 @@ export default class RolimonsService {
       .then(
         ({ data }) =>
           new RolimonsItemDetails(
-            new RolimonsScraper(data).rolimonsItemDetails()
+            new RolimonsScraper(data).marketPlaceItemsDetails()
           )
       );
   }

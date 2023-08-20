@@ -9,7 +9,11 @@ export default class RolimonsScraper extends Scraper {
     super(data);
   }
 
-  rolimonsItemDetails() {
+  /**
+   *
+   * @returns {{[x: string]: any}}
+   */
+  marketPlaceItemsDetails() {
     return JSON.parse(this.data.match(/var item_details = (.*);/)?.at(1) || "");
   }
 }

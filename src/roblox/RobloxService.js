@@ -2,7 +2,8 @@ import AssetDetailsPurchaseDTO from "./AssetDetailsPurchaseDTO";
 import User from "../user/User";
 import RobloxRepository from "./RobloxRepository";
 import ItemsDetailsQueryParamsDTO from "./ItemsDetailsQueryParamsDTO";
-import AssetDetailsQueryParamsDTO from "./AssetDetailsQueryParamsDTO";
+import CatalogItemsDetailsQueryParamDTO from "./CatalogItemsDetailsQueryParamDTO";
+import ProductPurchaseDTO from "./ProductPurchaseDTO";
 
 export default class RobloxService {
   #robloxRepository;
@@ -15,9 +16,29 @@ export default class RobloxService {
     this.#robloxRepository = robloxRepository;
   }
 
-  findManyCollectableAssetDetails() {
+  findManyCollectableAssetDetails(maxPrice = 0) {
     return this.#robloxRepository
-      .findManyAssetDetails(new AssetDetailsQueryParamsDTO(1, 2, 3, true, 10))
+      .findManyAssetDetailsByCatalogItemsDetails(
+        new CatalogItemsDetailsQueryParamDTO(
+          1,
+          2,
+          3,
+          true,
+          120,
+          0,
+          maxPrice,
+          1,
+          3
+        )
+      )
+      .then(({ data: { data: assetsDetails } }) => assetsDetails);
+  }
+
+  findManyFreeAssetDetails() {
+    return this.#robloxRepository
+      .findManyAssetDetailsByCatalogItemsDetails(
+        new CatalogItemsDetailsQueryParamDTO(1, 2, 3, true, 120, 0, 0, 1, 3)
+      )
       .then(({ data: { data: assetsDetails } }) => assetsDetails);
   }
 
@@ -30,25 +51,8 @@ export default class RobloxService {
 
   getUser() {
     return this.#robloxRepository
-      .getUser()
+      .getAuthenticatedUser()
       .then(({ data }) => new User(data.id));
-  }
-
-  /**
-   *
-   * @param {ItemsDetailsQueryParamsDTO} itemsDetailsQueryParamsDTO
-   * @returns
-   */
-  findFirstCatalogDetailByItemDetails(itemsDetailsQueryParamsDTO) {
-    return this.#robloxRepository
-      .findManyCatalogDetailByItemsDetails([itemsDetailsQueryParamsDTO])
-      .then(
-        ({
-          data: {
-            data: [catalogDetails],
-          },
-        }) => catalogDetails
-      );
   }
 
   /**
@@ -59,28 +63,17 @@ export default class RobloxService {
   findManyCatalogDetailByItemsDetails(itemsDetailsQueryParamsDTO) {
     return this.#robloxRepository
       .findManyCatalogDetailByItemsDetails(itemsDetailsQueryParamsDTO)
-      .then(({ data: { data: catalogDetails } }) => catalogDetails);
+      .then(({ data: { data: itemsDetails } }) => itemsDetails);
   }
 
   /**
    *
-   * @param {string} collectibleItemId
+   * @param {string[]} itemsIds
    * @returns
    */
-  findFirstAssetDetailsByCollectibleItemIds(collectibleItemId) {
+  findManyAssetDetailsByItemIds(itemsIds) {
     return this.#robloxRepository
-      .findManyAssetDetailsByCollectibleItemIds([collectibleItemId])
-      .then(({ data: [assetDetails] }) => assetDetails);
-  }
-
-  /**
-   *
-   * @param {string[]} collectibleItemsIds
-   * @returns
-   */
-  findManyAssetDetailsByCollectibleItemIds(collectibleItemsIds) {
-    return this.#robloxRepository
-      .findManyAssetDetailsByCollectibleItemIds(collectibleItemsIds)
+      .findManyAssetDetailsByItemIds(itemsIds)
       .then(({ data }) => data);
   }
 
@@ -91,5 +84,18 @@ export default class RobloxService {
    */
   purchaseAssetDetails(assetDetailsPurchaseDTO) {
     return this.#robloxRepository.purchaseAssetDetails(assetDetailsPurchaseDTO);
+  }
+
+  /**
+   *
+   * @param {number} productId
+   * @param {ProductPurchaseDTO} purchaseProductDTO
+   * @returns
+   */
+  purchaseProduct(productId, purchaseProductDTO) {
+    return this.#robloxRepository.purchaseProduct(
+      productId,
+      purchaseProductDTO
+    );
   }
 }
