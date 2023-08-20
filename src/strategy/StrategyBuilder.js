@@ -3,9 +3,8 @@ import RolimonsRepository from "../rolimons/RolimonsRepository";
 import RobloxService from "../roblox/RobloxService";
 import RolimonsService from "../rolimons/RolimonsService";
 import RobloxRepository from "../roblox/RobloxRepository";
-import UGCLimitedSniperStrategy from "../strategies/UGCLimitedSniperStrategy";
-import FreeItemsSniperStrategy from "../strategies/FreeItemsSniperStrategy";
-import Strategy from "./Strategy";
+import UGCLimitedStrategy from "../strategies/UGCLimitedStrategy";
+import FreeProductsStrategy from "../strategies/FreeProductsStrategy";
 
 export default class StrategyBuilder {
   #container = new ContainerBuilder();
@@ -26,26 +25,16 @@ export default class StrategyBuilder {
       this.#container.get(RolimonsRepository.name),
     ]);
 
-    this.#container.register(Strategy.name, Strategy, [
+    this.#container.register(UGCLimitedStrategy.name, UGCLimitedStrategy, [
+      ROBLOSECURITY,
+      this.#container.get(RobloxService.name),
+      this.#container.get(RolimonsService.name),
+    ]);
+
+    this.#container.register(FreeProductsStrategy.name, FreeProductsStrategy, [
       ROBLOSECURITY,
       this.#container.get(RobloxService.name),
     ]);
-
-    this.#container.register(
-      UGCLimitedSniperStrategy.name,
-      UGCLimitedSniperStrategy,
-      [
-        ROBLOSECURITY,
-        this.#container.get(RobloxService.name),
-        this.#container.get(RolimonsService.name),
-      ]
-    );
-
-    this.#container.register(
-      FreeItemsSniperStrategy.name,
-      FreeItemsSniperStrategy,
-      [ROBLOSECURITY, this.#container.get(RobloxService.name)]
-    );
   }
 
   /**

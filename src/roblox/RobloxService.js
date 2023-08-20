@@ -34,7 +34,7 @@ export default class RobloxService {
       .then(({ data: { data: assetsDetails } }) => assetsDetails);
   }
 
-  findManyFreeAssetDetails() {
+  findManyFreeProductsAssetDetails() {
     return this.#robloxRepository
       .findManyAssetDetailsByCatalogItemsDetails(
         new CatalogItemsDetailsQueryParamDTO(1, 2, 3, true, 120, 0, 0, 1, 3)

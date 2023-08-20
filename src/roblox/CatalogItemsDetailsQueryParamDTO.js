@@ -15,7 +15,7 @@ export default class CatalogItemsDetailsQueryParamDTO {
    * @param {number} salesTypeFilter
    * @param {number} sortType
    * @param {boolean} includeNotForSale
-   * @param {10 | 28 | 30 | 60 | 120} limit
+   * @param {10 | 30 | 60 | 120} limit
    * @param {number} pxMin
    * @param {number} pxMax
    * @param {number} sortAggregation

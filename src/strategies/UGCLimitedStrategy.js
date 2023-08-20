@@ -5,7 +5,7 @@ import RolimonsService from "../rolimons/RolimonsService";
 import AssetDetailsPurchaseDTO from "../roblox/AssetDetailsPurchaseDTO";
 import Strategy from "../strategy/Strategy";
 
-export default class UGCLimitedSniperStrategy extends Strategy {
+export default class UGCLimitedStrategy extends Strategy {
   #robloxService;
   #rolimonsService;
 
@@ -27,24 +27,24 @@ export default class UGCLimitedSniperStrategy extends Strategy {
 
   /**
    *
-   * @see {@link UGCLimitedSniperStrategy.spamMultiplier}
-   * @param {any[]} catalogsDetailsOrAssetDetails
+   * @see {@link UGCLimitedStrategy.spamMultiplier}
+   * @param {any[]} itemsDetailsOrAssetsDetails
    * @returns
    */
-  async spamManyPurchasesByCatalogsDetailsOrAssetDetails(
-    catalogsDetailsOrAssetDetails
+  async spamManyPurchasesByItemsDetailsOrAssetsDetails(
+    itemsDetailsOrAssetsDetails
   ) {
     const purchases = [];
 
-    const isAssetDetails = catalogsDetailsOrAssetDetails.reduce(
+    const isAssetDetails = itemsDetailsOrAssetsDetails.reduce(
       (p, c) => "collectibleProductId" in c || p,
       false
     );
 
     const assetsDetails = isAssetDetails
-      ? catalogsDetailsOrAssetDetails
+      ? itemsDetailsOrAssetsDetails
       : await this.#robloxService.findManyAssetDetailsByItemIds(
-          catalogsDetailsOrAssetDetails.map(
+          itemsDetailsOrAssetsDetails.map(
             ({ collectibleItemId }) => collectibleItemId
           )
         );
@@ -97,7 +97,7 @@ export default class UGCLimitedSniperStrategy extends Strategy {
           ),
         ]);
 
-      return this.spamManyPurchasesByCatalogsDetailsOrAssetDetails([
+      return this.spamManyPurchasesByItemsDetailsOrAssetsDetails([
         catalogDetails,
       ]);
     }
@@ -107,7 +107,7 @@ export default class UGCLimitedSniperStrategy extends Strategy {
     return this.#robloxService
       .findManyCollectableAssetDetails(this.maxPrice)
       .then((assetsDetails) =>
-        this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(assetsDetails)
+        this.spamManyPurchasesByItemsDetailsOrAssetsDetails(assetsDetails)
       );
   }
 
@@ -116,16 +116,15 @@ export default class UGCLimitedSniperStrategy extends Strategy {
    * @param {number[]} productsId
    * @returns
    */
-  async snipeProductByIds(productsId) {
-    const productCatalogDetails =
-      await this.#robloxService.findManyCatalogDetailByItemsDetails(
+  snipeProductByIds(productsId) {
+    return this.#robloxService
+      .findManyCatalogDetailByItemsDetails(
         productsId.map(
           (productId) => new ItemsDetailsQueryParamsDTO("Asset", productId)
         )
+      )
+      .then((itemsDetails) =>
+        this.spamManyPurchasesByItemsDetailsOrAssetsDetails(itemsDetails)
       );
-
-    return this.spamManyPurchasesByCatalogsDetailsOrAssetDetails(
-      productCatalogDetails
-    );
   }
 }
