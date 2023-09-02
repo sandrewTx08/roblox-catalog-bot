@@ -5,6 +5,7 @@ import RolimonsService from "../rolimons/RolimonsService";
 import RobloxRepository from "../roblox/RobloxRepository";
 import UGCLimitedStrategy from "../strategies/UGCLimitedStrategy";
 import FreeProductsStrategy from "../strategies/FreeProductsStrategy";
+import Strategy from "./Strategy";
 
 export default class StrategyBuilder {
   #container = new ContainerBuilder();
@@ -39,10 +40,10 @@ export default class StrategyBuilder {
 
   /**
    *
-   * @template {{[x: string]: any}} T
+   * @template {typeof Strategy} T
    * @param {string} ROBLOSECURITY
    * @param {T} strategy
-   * @returns {T['prototype']}
+   * @returns {InstanceType<T>}
    */
   static build(ROBLOSECURITY, strategy) {
     return new StrategyBuilder(ROBLOSECURITY).#container.get(strategy.name);

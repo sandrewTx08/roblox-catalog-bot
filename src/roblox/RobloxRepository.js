@@ -20,6 +20,12 @@ export default class RobloxRepository {
     return axios.post("https://accountsettings.roblox.com/v1/email");
   }
 
+  getXCsrfTokenByPresence() {
+    return axios.post(
+      "https://presence.roblox.com/v1/presence/register-app-presence"
+    );
+  }
+
   getAuthenticatedUser() {
     return axios("https://users.roblox.com/v1/users/authenticated");
   }

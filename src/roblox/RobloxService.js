@@ -44,9 +44,12 @@ export default class RobloxService {
 
   getXCsrfToken() {
     return this.#robloxRepository
-      .getXCsrfTokenByEmailValidation()
+      .getXCsrfTokenByPresence()
       .catch(({ response }) => response)
-      .then(({ headers }) => headers["x-csrf-token"]);
+      .then(
+        ({ headers }) =>
+          headers["x-csrf-token"] || headers["X-CSRF-TOKEN"] || ""
+      );
   }
 
   getUser() {

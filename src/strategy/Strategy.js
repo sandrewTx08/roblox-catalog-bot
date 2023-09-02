@@ -29,8 +29,13 @@ export default class Strategy {
 
   setXCsrfToken() {
     return this.#robloxService.getXCsrfToken().then((xCsrfToken) => {
-      axios.defaults.headers.common["x-csrf-token"] =
-        xCsrfToken || axios.defaults.headers.common["x-csrf-token"] || "";
+      const _xCsrfToken =
+        xCsrfToken ||
+        axios.defaults.headers.common["x-csrf-token"] ||
+        axios.defaults.headers.common["X-CSRF-TOKEN"] ||
+        "";
+      axios.defaults.headers.common["x-csrf-token"] = _xCsrfToken;
+      axios.defaults.headers.common["X-CSRF-TOKEN"] = _xCsrfToken;
       return this;
     });
   }
