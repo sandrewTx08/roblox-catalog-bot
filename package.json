@@ -1,8 +1,8 @@
 {
-  "name": "ugc-limited-sniper",
+  "name": "roblox-catalog-bot",
   "version": "0.0.1",
   "type": "module",
-  "description": "Buy Roblox limited UGC items",
+  "description": "Buy Roblox catalog items",
   "main": "index.js",
   "author": "sandrewTx08",
   "license": "ISC",
@@ -16,10 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sandrewTx08/ugc-limited-sniper.git"
+    "url": "git+https://github.com/sandrewTx08/roblox-catalog-bot.git"
   },
   "bugs": {
-    "url": "https://github.com/sandrewTx08/ugc-limited-sniper/issues"
+    "url": "https://github.com/sandrewTx08/roblox-catalog-bot/issues"
   },
-  "homepage": "https://github.com/sandrewTx08/ugc-limited-sniper#readme"
+  "homepage": "https://github.com/sandrewTx08/roblox-catalog-bot#readme"
 }

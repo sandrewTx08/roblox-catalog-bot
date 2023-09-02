@@ -19,7 +19,7 @@ export default class FreeProductsStrategy extends Strategy {
 
   /**
    *
-   * @see {@link purchasesTimeout}
+   * @see {@link FreeProductsStrategy.purchasesTimeout}
    * @returns
    */
   async purchaseManyFreeProducts() {
