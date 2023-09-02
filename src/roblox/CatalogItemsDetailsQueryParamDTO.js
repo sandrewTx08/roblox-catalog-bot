@@ -39,7 +39,7 @@ export default class CatalogItemsDetailsQueryParamDTO {
     this.Limit = limit;
     this.pxMin = pxMin;
     this.pxMax = pxMax;
-    this.sortAggregation = sortAggregation;
+    this.SortAggregation = sortAggregation;
     this.CurrencyType = currencyType;
   }
 }
