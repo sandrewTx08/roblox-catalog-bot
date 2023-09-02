@@ -40,7 +40,7 @@ export default class StrategyBuilder {
 
   /**
    *
-   * @template {typeof Strategy} T
+   * @template {{ name: string }} T
    * @param {string} ROBLOSECURITY
    * @param {T} strategy
    * @returns {InstanceType<T>}
